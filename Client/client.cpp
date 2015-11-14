@@ -2,24 +2,55 @@
 
 Client::Client(QString host, quint16 port, QObject *parent) : QObject(parent)
 {
-    QTcpSocket *sock = new QTcpSocket(this);
-    sock->connectToHost(QHostAddress(host), port);
+    socket = new QTcpSocket(this);
+    socket->connectToHost(QHostAddress(host), port);
 
-    //connect(socket, SIGNAL(readyRead()), SLOT(readyRead()));
+    blockSize = 0;
+
+    connect(socket, SIGNAL(readyRead()), SLOT(readyRead()));
 }
 
 void Client::readyRead()
 {
-    QByteArray data;
+    QDataStream in(socket);
+    if (blockSize == 0) {
+        if (socket->bytesAvailable() < (int)sizeof(quint16))
+            return;
+        in >> blockSize;
+    }
+    if (socket->bytesAvailable() < blockSize)
+        return;
+    else
+        blockSize = 0;
+    quint8 command;
+    in >> command;
 
-    while (socket->bytesAvailable() > 0)
-        data.append(socket->readAll());
-
-    output.writeData(data);
+    switch (command) {
+    case sClient::c_SuccLogin:
+        emit succLogin();
+        break;
+    default:
+        break;
+    }
 }
 
-void Client::writeData(QByteArray data)
+void Client::sendBlock(quint8 command, QByteArray data)
 {
-    if(socket)
-        socket->write(data);
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out << (quint16)0;
+    out << command;
+    out << data;
+    out.device()->seek(0);
+    out << (quint16)(block.size() - sizeof(quint16));
+    socket->write(block);
+}
+void Client::login(QString login, QString password)
+{
+   QByteArray data;
+   QDataStream out(&data, QIODevice::WriteOnly);
+
+   out << login;
+
+   sendBlock(sClient::c_login, data);
 }

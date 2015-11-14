@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QMessageBox>
+#include <QString>
 #include "audioinput.h"
 #include "audiooutput.h"
 
@@ -22,6 +24,8 @@ public:
     ~MainWindow();
 private slots:
     void bClicked();
+public slots:
+    void succLogin();
 };
 
 #endif // MAINWINDOW_H

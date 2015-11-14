@@ -5,15 +5,15 @@
 #include <QList>
 #include <QtNetwork>
 #include <QDebug>
-#include "client.h"
+#include "sclient.h"
 
-class Client;
+class sClient;
 
 class Server : public QTcpServer
 {
     Q_OBJECT
 private:
-    QList<Client *> cliList;
+    QList<sClient *> cliList;
 public:
     explicit Server(quint16 port, QObject *parent = 0);
     ~Server();
@@ -22,11 +22,8 @@ protected:
 
 signals:
 
-private slots:
-    void writeData(QByteArray data);
-    void readyRead();
-
 public slots:
+    void onUserDisconnected(sClient *client);
 };
 
 #endif // SERVER_H
