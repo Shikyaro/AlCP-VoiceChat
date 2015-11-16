@@ -23,7 +23,7 @@ void Client::readyRead()
         return;
     else
         blockSize = 0;
-    quint8 command = 0;
+    quint8 command;
     in >> command;
 
     switch (command) {

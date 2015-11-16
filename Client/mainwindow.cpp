@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     cw->show();
     connect(mbut, SIGNAL(clicked()), this, SLOT(bClicked()));
 
-    client = new Client("127.0.0.1",6969, this);
+    client = new Client("192.168.0.65",6969, this);
     qDebug() << "conn";
 
     connect(client,SIGNAL(succLogin()),this,SLOT(succLogin()));

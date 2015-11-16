@@ -49,6 +49,7 @@ void sClient::onReadyRead()
         bsize = 0;
 
     quint8 command;
+    command = 0;
     in >> command;
 
     qDebug() << "Received command " << command;
@@ -70,7 +71,7 @@ void sClient::onReadyRead()
     case c_voice_say:
     {
         if(!isMuted){
-            QByteArray vb = NULL;
+            QByteArray vb;
             in >> vb;
 
             server->sendToAll(c_voice_say, vb, userName, true);
@@ -87,7 +88,9 @@ void sClient::sendBlock(quint8 command, QByteArray data)
     QDataStream out(&block, QIODevice::WriteOnly);
     out << (quint16)0;
     out << (quint8)command;
-    out << data;
+    //out << data;
+    data.resize(data.length());
+    block.append(data);
     out.device()->seek(0);
     out << (quint16)(block.size() - sizeof(quint16));
     socket->write(block);
