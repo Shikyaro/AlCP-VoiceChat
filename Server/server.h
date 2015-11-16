@@ -14,16 +14,21 @@ class Server : public QTcpServer
     Q_OBJECT
 private:
     QList<sClient *> cliList;
+
 public:
     explicit Server(quint16 port, QObject *parent = 0);
     ~Server();
+
+
+    void     sendToAll(quint8 command, QByteArray data, QString senderName, bool exceptSender); /*test*/
+
 protected:
-    void incomingConnection(qintptr handle);
+    void    incomingConnection(qintptr handle);
 
 signals:
 
 public slots:
-    void onUserDisconnected(sClient *client);
+    void    onUserDisconnected(sClient *client);
 };
 
 #endif // SERVER_H

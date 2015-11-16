@@ -21,10 +21,8 @@ void AudioInput::readyRead()
 {
     QByteArray data;
 
-    //Check the number of samples in input buffer
     qint64 len = audio->bytesReady();
 
-    //Read sound samples from input device to buffer
     if (len > 0)
     {
         data.resize(len);
