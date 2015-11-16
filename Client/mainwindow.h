@@ -21,6 +21,7 @@ private:
     QWidget *cw;
     QVBoxLayout *ml;
     QLineEdit *ql;
+    QLineEdit *ip;
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();

@@ -7,18 +7,18 @@ MainWindow::MainWindow(QWidget *parent)
     mbut = new QPushButton("Go!");
     cw = new QWidget();
     ql = new QLineEdit();
+    ip = new QLineEdit();
     ml->addWidget(mbut);
     ml->addWidget(ql);
+    ml->addWidget(ip);
     cw->setLayout(ml);
     this->setCentralWidget(cw);
     cw->show();
     connect(mbut, SIGNAL(clicked()), this, SLOT(bClicked()));
 
-    client = new Client("192.168.0.65",6969, this);
-    qDebug() << "conn";
-
-    connect(client,SIGNAL(succLogin()),this,SLOT(succLogin()));
 }
+
+
 
 MainWindow::~MainWindow()
 {
@@ -27,6 +27,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::bClicked()
 {
+    client = new Client(ip->text(),6969, this);
+    connect(client,SIGNAL(succLogin()),this,SLOT(succLogin()));
+
+    qDebug() << "conn";
+
     qDebug() << "sadfsdf";
     client->login(ql->text(),"nopw");
 
