@@ -8,6 +8,8 @@ sClient::sClient(qintptr descr, Server *serv, QObject *parent) : QObject(parent)
     socket->setSocketDescriptor(descr);
 
     isLoggedIn = false;
+    isMuted = false;
+    userName = "NULL";
 
     qDebug() << "new client" << endl;
 
@@ -52,9 +54,28 @@ void sClient::onReadyRead()
     qDebug() << "Received command " << command;
     switch (command) {
     case c_login:
+    {
+        QStringList lp;
+        QString logp;
+        in >> logp;
+        lp = logp.split(lpsep);
+        userName = lp.at(0);
+        qDebug() << "usr: " << userName << " pwd: " << lp.at(1) << " " << lpsep;
         isLoggedIn = true;
+
         sendBlock(sClient::c_SuccLogin,NULL);
+
         break;
+    }
+    case c_voice_say:
+    {
+        if(!isMuted){
+            QByteArray vb = NULL;
+            in >> vb;
+
+            server->sendToAll(c_voice_say, vb, userName, true);
+        }
+    }
     default:
         break;
     }

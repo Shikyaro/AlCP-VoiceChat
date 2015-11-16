@@ -6,7 +6,9 @@ MainWindow::MainWindow(QWidget *parent)
     ml = new QVBoxLayout();
     mbut = new QPushButton("Go!");
     cw = new QWidget();
+    ql = new QLineEdit();
     ml->addWidget(mbut);
+    ml->addWidget(ql);
     cw->setLayout(ml);
     this->setCentralWidget(cw);
     cw->show();
@@ -26,13 +28,11 @@ MainWindow::~MainWindow()
 void MainWindow::bClicked()
 {
     qDebug() << "sadfsdf";
-    client->login("test1","nopw");
+    client->login(ql->text(),"nopw");
 
-    //client = new Client("127.0.0.1",6969, this);
-
-    //QAudioDeviceInfo devinfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput).at(0);
-    //input = new AudioInput(devinfo, this);
-    //connect(input, SIGNAL(dataReady(QByteArray)), client, SLOT(writeData(QByteArray)));
+    QAudioDeviceInfo devinfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput).at(0);
+    input = new AudioInput(devinfo, this);
+    connect(input, SIGNAL(dataReady(QByteArray)), client, SLOT(voiceSay(QByteArray)));
 }
 
 void MainWindow::succLogin()

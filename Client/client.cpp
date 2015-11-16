@@ -6,6 +6,7 @@ Client::Client(QString host, quint16 port, QObject *parent) : QObject(parent)
     socket->connectToHost(QHostAddress(host), port);
 
     blockSize = 0;
+    isLoggedIn = false;
 
     connect(socket, SIGNAL(readyRead()), SLOT(readyRead()));
 }
@@ -22,19 +23,27 @@ void Client::readyRead()
         return;
     else
         blockSize = 0;
-    quint8 command;
+    quint8 command = 0;
     in >> command;
 
     switch (command) {
     case sClient::c_SuccLogin:
         emit succLogin();
+        isLoggedIn = true;
         break;
+    case sClient::c_voice_say:
+    {
+        QByteArray dat;
+        in >> dat;
+        output.writeData(dat);
+    }
     default:
         break;
     }
 }
 
-void Client::sendBlock(quint8 command, QByteArray data)
+template <class dataBlock>
+void Client::sendBlock(quint8 command, dataBlock data)
 {
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
@@ -45,12 +54,17 @@ void Client::sendBlock(quint8 command, QByteArray data)
     out << (quint16)(block.size() - sizeof(quint16));
     socket->write(block);
 }
+
 void Client::login(QString login, QString password)
 {
-   QByteArray data;
-   QDataStream out(&data, QIODevice::WriteOnly);
+    QString lp(login);
+    lp.append(lpsep);
+    lp.append(password);
 
-   out << login;
+    sendBlock(sClient::c_login, lp);
+}
 
-   sendBlock(sClient::c_login, data);
+void Client::voiceSay(QByteArray data)
+{
+    sendBlock(sClient::c_voice_say, data);
 }

@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QString>
+#include <QLineEdit>
 #include "audioinput.h"
 #include "audiooutput.h"
 
@@ -19,6 +20,7 @@ private:
     AudioInput *input;
     QWidget *cw;
     QVBoxLayout *ml;
+    QLineEdit *ql;
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
