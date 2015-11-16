@@ -33,12 +33,13 @@ void Server::sendToAll(quint8 command, QByteArray data, QString senderName, bool
     sClient *cli;
 
     foreach (cli, cliList) {
-            if((cli->getName()!=senderName)&&(cli->getLoggedIn())&&(exceptSender)){
+            /*if((cli->getName()!=senderName)&&(cli->getLoggedIn())&&(exceptSender)){
                  cli->sendBlock(command, data);
         }else{
-            if(cli->getLoggedIn())
+            if(cli->getLoggedIn())*/
+        //qDebug() << data.size();
             cli->sendBlock(command, data);
         }
     }
-}
+//}
 

@@ -29,6 +29,8 @@ private:
     template <class dataBlock>
     void    sendBlock(quint8 command, dataBlock data);
 
+    void    sendVoice(QByteArray data);
+
     QTcpSocket  *socket;
     AudioOutput output;
     quint16     blockSize;

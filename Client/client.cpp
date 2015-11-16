@@ -13,19 +13,26 @@ Client::Client(QString host, quint16 port, QObject *parent) : QObject(parent)
 
 void Client::readyRead()
 {
+    blockSize = 0;
     QDataStream in(socket);
     if (blockSize == 0) {
         if (socket->bytesAvailable() < (int)sizeof(quint16))
+        {
             return;
+        }
         in >> blockSize;
     }
+    //qDebug() << "bytes " << socket->bytesAvailable();
+    //qDebug() << "block " << blockSize;
     if (socket->bytesAvailable() < blockSize)
         return;
     else
         blockSize = 0;
-    quint8 command;
-    in >> command;
 
+    quint8 command;
+    command = 0;
+    in >> command;
+    //qDebug() << "comm " << command;
     switch (command) {
     case sClient::c_SuccLogin:
         emit succLogin();
@@ -35,7 +42,9 @@ void Client::readyRead()
     {
         QByteArray dat;
         in >> dat;
+        qDebug() << dat.size();
         output.writeData(dat);
+        break;
     }
     default:
         break;
@@ -66,5 +75,15 @@ void Client::login(QString login, QString password)
 
 void Client::voiceSay(QByteArray data)
 {
-    sendBlock(sClient::c_voice_say, data);
+    sendVoice(data);
+}
+
+void Client::sendVoice(QByteArray data)
+{
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out << (quint16)0 << sClient::c_voice_say << data;
+    out.device()->seek(0);
+    out << (quint16)(block.size() - sizeof(quint16));
+    socket->write(block);
 }

@@ -46,8 +46,8 @@ void sClient::onReadyRead()
         }
         in >> blockSize;
     }
-    qDebug() << "bytes " << socket->bytesAvailable();
-    qDebug() << "block " << blockSize;
+    //qDebug() << "bytes " << socket->bytesAvailable();
+    //qDebug() << "block " << blockSize;
     if (socket->bytesAvailable() < blockSize)
         return;
     else
@@ -57,7 +57,7 @@ void sClient::onReadyRead()
     command = 0;
     in >> command;
 
-    qDebug() << "Received command " << command;
+    //qDebug() << "Received command " << command;
     switch (command) {
     case c_login:
     {
@@ -78,6 +78,7 @@ void sClient::onReadyRead()
         if(!isMuted){
             QByteArray vb;
             in >> vb;
+            //qDebug() << vb.size();
 
             server->sendToAll(c_voice_say, vb, userName, true);
         }
@@ -93,9 +94,7 @@ void sClient::sendBlock(quint8 command, QByteArray data)
     QDataStream out(&block, QIODevice::WriteOnly);
     out << (quint16)0;
     out << (quint8)command;
-    //out << data;
-    data.resize(data.length());
-    block.append(data);
+    out << data;
     out.device()->seek(0);
     out << (quint16)(block.size() - sizeof(quint16));
     socket->write(block);
