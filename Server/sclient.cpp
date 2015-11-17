@@ -4,10 +4,15 @@ sClient::sClient(qintptr descr, Server *serv, QObject *parent) : QObject(parent)
 {
     server=serv;
 
+    blockSize = 0;
     socket = new QTcpSocket(this);
     socket->setSocketDescriptor(descr);
 
     isLoggedIn = false;
+    isMuted = false;
+    userName = "NULL";
+
+
 
     qDebug() << "new client" << endl;
 
@@ -32,29 +37,52 @@ void sClient::onDisconnect()
 
 void sClient::onReadyRead()
 {
-    quint16 bsize = 0;
     QDataStream in(socket);
-    if (bsize == 0) {
+    if (blockSize == 0) {
         if (socket->bytesAvailable() < (int)sizeof(quint16))
+        {
+            qDebug() << "LOWER " << (int)sizeof(quint16);
             return;
-        in >> bsize;
+        }
+        in >> blockSize;
     }
-    qDebug() << "bytes " << socket->bytesAvailable();
-    qDebug() << "block " << bsize;
-    if (socket->bytesAvailable() < bsize)
+    //qDebug() << "bytes " << socket->bytesAvailable();
+    //qDebug() << "block " << blockSize;
+    if (socket->bytesAvailable() < blockSize)
         return;
     else
-        bsize = 0;
+        blockSize = 0;
 
     quint8 command;
+    command = 0;
     in >> command;
 
-    qDebug() << "Received command " << command;
+    //qDebug() << "Received command " << command;
     switch (command) {
     case c_login:
+    {
+        QStringList lp;
+        QString logp;
+        in >> logp;
+        lp = logp.split(lpsep);
+        userName = lp.at(0);
+        qDebug() << "usr: " << userName << " pwd: " << lp.at(1) << " " << lpsep;
         isLoggedIn = true;
+
         sendBlock(sClient::c_SuccLogin,NULL);
+
         break;
+    }
+    case c_voice_say:
+    {
+        if(!isMuted){
+            QByteArray vb;
+            in >> vb;
+            //qDebug() << vb.size();
+
+            server->sendToAll(c_voice_say, vb, userName, true);
+        }
+    }
     default:
         break;
     }
