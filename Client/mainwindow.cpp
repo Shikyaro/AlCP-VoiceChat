@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     cw = new QWidget();
     ql = new QLineEdit();
     ip = new QLineEdit();
+    ip->setText("127.0.0.1");
     ml->addWidget(mbut);
     ml->addWidget(ql);
     ml->addWidget(ip);
@@ -15,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent)
     this->setCentralWidget(cw);
     cw->show();
     connect(mbut, SIGNAL(clicked()), this, SLOT(bClicked()));
-
 }
 
 
@@ -32,7 +32,6 @@ void MainWindow::bClicked()
 
     qDebug() << "conn";
 
-    qDebug() << "sadfsdf";
     client->login(ql->text(),"nopw");
 
     QAudioDeviceInfo devinfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput).at(0);

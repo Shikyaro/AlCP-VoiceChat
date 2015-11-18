@@ -6,6 +6,7 @@
 #include <QtNetwork>
 #include <QDebug>
 #include "sclient.h"
+#include "database.h"
 
 class sClient;
 
@@ -14,6 +15,7 @@ class Server : public QTcpServer
     Q_OBJECT
 private:
     QList<sClient *> cliList;
+    database *db;
 
 public:
     explicit Server(quint16 port, QObject *parent = 0);

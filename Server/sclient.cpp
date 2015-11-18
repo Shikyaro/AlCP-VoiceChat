@@ -66,7 +66,7 @@ void sClient::onReadyRead()
         in >> logp;
         lp = logp.split(lpsep);
         userName = lp.at(0);
-        qDebug() << "usr: " << userName << " pwd: " << lp.at(1) << " " << lpsep;
+        qDebug() << "User: " << userName << " pass: " << lp.at(1) << " " << lpsep;
         isLoggedIn = true;
 
         sendBlock(sClient::c_SuccLogin,NULL);
@@ -78,7 +78,6 @@ void sClient::onReadyRead()
         if(!isMuted){
             QByteArray vb;
             in >> vb;
-            //qDebug() << vb.size();
 
             server->sendToAll(c_voice_say, vb, userName, true);
         }

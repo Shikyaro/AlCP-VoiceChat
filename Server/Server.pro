@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network multimedia
+QT       += core gui declarative network multimedia sql
+
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -15,8 +16,10 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     server.cpp \
-    sclient.cpp
+    sclient.cpp \
+    database.cpp
 
 HEADERS  += mainwindow.h \
     server.h \
-    sclient.h
+    sclient.h \
+    database.h

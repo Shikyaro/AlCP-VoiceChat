@@ -6,6 +6,14 @@ Server::Server(quint16 port, QObject *parent) : QTcpServer(parent)
         qDebug() << "Сервер запущен" << endl;
     else
         qDebug() << "NOt started" << endl;
+
+    db = new database(this);
+    if(db->initialize("127.0.0.1","alcpvc","root","alcpvc"))
+        qDebug() << "БД подключено";
+    else
+        qDebug() << "БД не подключено!!!!";
+
+    qDebug() << db->getPower("Alkor");
 }
 
 Server::~Server()
@@ -25,7 +33,7 @@ void Server::onUserDisconnected(sClient *client)
 {
     cliList.removeAt(cliList.indexOf(client));
 
-    qDebug() << "Disced!";
+    qDebug() << "User " << client->getName() << " disconnected";
 }
 
 void Server::sendToAll(quint8 command, QByteArray data, QString senderName, bool exceptSender)
@@ -33,13 +41,14 @@ void Server::sendToAll(quint8 command, QByteArray data, QString senderName, bool
     sClient *cli;
 
     foreach (cli, cliList) {
-            /*if((cli->getName()!=senderName)&&(cli->getLoggedIn())&&(exceptSender)){
-                 cli->sendBlock(command, data);
+            if((exceptSender)){
+                if(cli->getName()!=senderName)
+                    if(cli->getLoggedIn())
+                        cli->sendBlock(command, data);
         }else{
-            if(cli->getLoggedIn())*/
-        //qDebug() << data.size();
-            cli->sendBlock(command, data);
+            if(cli->getLoggedIn())
+                cli->sendBlock(command, data);
         }
     }
-//}
+}
 
