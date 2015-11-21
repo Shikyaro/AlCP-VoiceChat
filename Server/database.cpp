@@ -32,11 +32,37 @@ uint database::getPower(QString userName)
     if(que.exec()){
         que.last();
         return que.value(0).toUInt();
-    //ret = que.value(0).toUInt();
     }else{
-        qDebug() << "exec failed";
+        qDebug() << "Exec failed on getPower";
+        return 0;
     }
+}
+bool database::authorize(QString userName, QString password)
+{
+    QSqlQuery que;
+    que.prepare(QString("SELECT `password` "
+                        "FROM users "
+                        "WHERE users.username = \"%1\"").arg(userName));
+    if(que.exec()){
+        que.last();
+        return (password==que.value(0).toString());
+    }else{
+        qDebug() << "Exec failed on authorize";
+        return false;
+    }
+}
 
-    return 0;
+bool database::newUser(QString userName, QString password)
+{
+    QSqlQuery que;
+    que.prepare(QString("INSERT INTO users (username, `password`, permissions, muted, banned)"
+                        "VALUES ('%1','%2',4,0,0)").arg(userName,password));
+
+    if (que.exec()){
+        return true;
+    }else{
+        qDebug() << que.lastError().databaseText();
+        return false;
+    }
 }
 

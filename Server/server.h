@@ -13,6 +13,7 @@ class sClient;
 class Server : public QTcpServer
 {
     Q_OBJECT
+    friend class sClient;
 private:
     QList<sClient *> cliList;
     database *db;
@@ -22,7 +23,7 @@ public:
     ~Server();
 
 
-    void     sendToAll(quint8 command, QByteArray data, QString senderName, bool exceptSender); /*test*/
+    void     sendToAll(quint8 command, QByteArray data, QString senderName, bool exceptSender);
 
 protected:
     void    incomingConnection(qintptr handle);

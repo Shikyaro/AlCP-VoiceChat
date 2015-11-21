@@ -12,8 +12,6 @@ Server::Server(quint16 port, QObject *parent) : QTcpServer(parent)
         qDebug() << "БД подключено";
     else
         qDebug() << "БД не подключено!!!!";
-
-    qDebug() << db->getPower("Alkor");
 }
 
 Server::~Server()

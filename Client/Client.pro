@@ -17,9 +17,11 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     audiooutput.cpp \
     client.cpp \
-    audioinput.cpp
+    audioinput.cpp \
+    logindialog.cpp
 
 HEADERS  += mainwindow.h \
     audiooutput.h \
     client.h \
-    audioinput.h
+    audioinput.h \
+    logindialog.h

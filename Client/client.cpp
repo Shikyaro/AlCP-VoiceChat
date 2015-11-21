@@ -8,7 +8,7 @@ Client::Client(QString host, quint16 port, QObject *parent) : QObject(parent)
     blockSize = 0;
     isLoggedIn = false;
 
-    connect(socket, SIGNAL(readyRead()), SLOT(readyRead()));
+    connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
 }
 
 void Client::readyRead()
@@ -21,9 +21,10 @@ void Client::readyRead()
             return;
         }
         in >> blockSize;
+
     }
-    //qDebug() << "bytes " << socket->bytesAvailable();
-    //qDebug() << "block " << blockSize;
+    qDebug() << blockSize;
+    qDebug() << socket->bytesAvailable();
     if (socket->bytesAvailable() < blockSize)
         return;
     else
@@ -32,17 +33,33 @@ void Client::readyRead()
     quint8 command;
     command = 0;
     in >> command;
-    //qDebug() << "comm " << command;
+    qDebug() << command;
     switch (command) {
     case sClient::c_SuccLogin:
-        emit succLogin();
+    {
+        emit this->succLogin();
         isLoggedIn = true;
         break;
+    }
+    case sClient::c_unSucc_L:
+    {
+        emit this->unSuccLogin();
+        break;
+    }
+    case sClient::c_Succ_Reg:
+    {
+        emit this->succReg();
+        break;
+    }
+    case sClient::c_unSucc_R:
+    {
+        emit this->unSuccReg();
+        break;
+    }
     case sClient::c_voice_say:
     {
         QByteArray dat;
         in >> dat;
-        qDebug() << dat.size();
         output.writeData(dat);
         break;
     }
@@ -71,6 +88,14 @@ void Client::login(QString login, QString password)
     lp.append(password);
 
     sendBlock(sClient::c_login, lp);
+}
+void Client::reg(QString login, QString password)
+{
+    QString lp(login);
+    lp.append(lpsep);
+    lp.append(password);
+
+    sendBlock(sClient::c_reg, lp);
 }
 
 void Client::voiceSay(QByteArray data)

@@ -16,9 +16,13 @@ public:
 
 signals:
     void    succLogin();
+    void    unSuccLogin();
+    void    succReg();
+    void    unSuccReg();
 
 public slots:
     void    login(QString login, QString password);
+    void    reg(QString login, QString password);
     void    voiceSay(QByteArray data);
 
 private slots:

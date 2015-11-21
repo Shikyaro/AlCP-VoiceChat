@@ -3,6 +3,8 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    this->installEventFilter(this);
+
     ml = new QVBoxLayout();
     mbut = new QPushButton("Go!");
     cw = new QWidget();
@@ -16,6 +18,22 @@ MainWindow::MainWindow(QWidget *parent)
     this->setCentralWidget(cw);
     cw->show();
     connect(mbut, SIGNAL(clicked()), this, SLOT(bClicked()));
+
+    client = new Client(ip->text(),6969, this);
+    connect(client,SIGNAL(succLogin()),this,SLOT(succLogin()));
+
+    this->setEnabled(false);
+
+    ldialog = new LoginDialog(this);
+    ldialog->show();
+
+    connect(ldialog,SIGNAL(s_log(QString,QString)),client,SLOT(login(QString,QString)));
+    connect(ldialog,SIGNAL(s_reg(QString,QString)),client,SLOT(reg(QString,QString)));
+    connect(ldialog,SIGNAL(quit()),this,SLOT(close()));
+
+    connect(client,SIGNAL(unSuccReg()),ldialog,SLOT(onUnSuccReg()));
+    connect(client,SIGNAL(unSuccLogin()),ldialog,SLOT(onUnSuccLogin()));
+    connect(client,SIGNAL(succLogin()),this,SLOT(succLogin()));
 }
 
 
@@ -27,13 +45,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::bClicked()
 {
-    client = new Client(ip->text(),6969, this);
-    connect(client,SIGNAL(succLogin()),this,SLOT(succLogin()));
-
-    qDebug() << "conn";
-
-    client->login(ql->text(),"nopw");
-
     QAudioDeviceInfo devinfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput).at(0);
     input = new AudioInput(devinfo, this);
     connect(input, SIGNAL(dataReady(QByteArray)), client, SLOT(voiceSay(QByteArray)));
@@ -41,6 +52,17 @@ void MainWindow::bClicked()
 
 void MainWindow::succLogin()
 {
-    QMessageBox *msg = new QMessageBox(QMessageBox::Information,QString("succes login"),QString("Grats! Login Success"));
-    msg->show();
+    ldialog->close();
+    this->setEnabled(true);
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if(obj == this && event->type() == QEvent::Close){
+        event->ignore();
+        this->showMinimized();
+        return true;
+    }else{
+        return false;
+    }
 }

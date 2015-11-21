@@ -7,6 +7,7 @@
 #include <QtNetwork>
 #include <QDebug>
 #include <QStringList>
+#include <QRegExp>
 #include "server.h"
 
 
@@ -24,17 +25,24 @@ private:
     QString     userName;
     bool        isMuted;
 
-
+    bool        isValid(QString userName);
 public:
     explicit sClient(qintptr descr, Server *serv, QObject *parent = 0);
     ~sClient();
 
-    static const quint8 c_login     = 1;
-    static const quint8 c_SuccLogin = 201;
-    static const quint8 c_voice_say = 2;
+    static const quint8 c_login     = (quint8)1;
+    static const quint8 c_SuccLogin = (quint8)201;
+    static const quint8 c_unSucc_L  = (quint8)202;
 
-    QString getName()       {return userName;}
-    bool    getLoggedIn()   {return isLoggedIn;}
+    static const quint8 c_voice_say = (quint8)2;
+
+    static const quint8 c_reg       = (quint8)3;
+    static const quint8 c_Succ_Reg  = (quint8)203;
+    static const quint8 c_unSucc_R  = (quint8)204;
+
+
+    QString     getName()       {return userName;}
+    bool        getLoggedIn()   {return isLoggedIn;}
 
     void        sendBlock(quint8 command, QByteArray data);
 signals:

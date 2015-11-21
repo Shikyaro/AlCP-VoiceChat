@@ -41,13 +41,10 @@ void sClient::onReadyRead()
     if (blockSize == 0) {
         if (socket->bytesAvailable() < (int)sizeof(quint16))
         {
-            qDebug() << "LOWER " << (int)sizeof(quint16);
             return;
         }
         in >> blockSize;
     }
-    //qDebug() << "bytes " << socket->bytesAvailable();
-    //qDebug() << "block " << blockSize;
     if (socket->bytesAvailable() < blockSize)
         return;
     else
@@ -57,7 +54,6 @@ void sClient::onReadyRead()
     command = 0;
     in >> command;
 
-    //qDebug() << "Received command " << command;
     switch (command) {
     case c_login:
     {
@@ -65,11 +61,14 @@ void sClient::onReadyRead()
         QString logp;
         in >> logp;
         lp = logp.split(lpsep);
-        userName = lp.at(0);
-        qDebug() << "User: " << userName << " pass: " << lp.at(1) << " " << lpsep;
-        isLoggedIn = true;
 
-        sendBlock(sClient::c_SuccLogin,NULL);
+        if (server->db->authorize(lp.at(0),lp.at(1))){
+            userName = lp.at(0);
+            isLoggedIn = true;
+            sendBlock(sClient::c_SuccLogin,NULL);
+        }else{
+            sendBlock(sClient::c_unSucc_L,NULL);
+        }
 
         break;
     }
@@ -81,6 +80,25 @@ void sClient::onReadyRead()
 
             server->sendToAll(c_voice_say, vb, userName, true);
         }
+        break;
+    }
+    case c_reg:
+    {
+        QStringList lp;
+        QString logp;
+        in >> logp;
+
+        lp = logp.split(lpsep);
+
+        if ((isValid(lp.at(0)))){
+            if((server->db->newUser(lp.at(0),lp.at(1))))
+                sendBlock(c_Succ_Reg,NULL);
+            else
+                sendBlock(c_unSucc_R,NULL);
+        }else{
+            sendBlock(c_unSucc_R,NULL);
+        }
+        break;
     }
     default:
         break;
@@ -93,8 +111,15 @@ void sClient::sendBlock(quint8 command, QByteArray data)
     QDataStream out(&block, QIODevice::WriteOnly);
     out << (quint16)0;
     out << (quint8)command;
-    out << data;
+    if (data != NULL)
+        out << data;
     out.device()->seek(0);
     out << (quint16)(block.size() - sizeof(quint16));
     socket->write(block);
+}
+
+bool sClient::isValid(QString userName)
+{
+    QRegExp reg("[A-z_]+");
+    return (reg.exactMatch(userName));
 }
