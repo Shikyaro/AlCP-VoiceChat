@@ -2,18 +2,23 @@
 
 Client::Client(QString host, quint16 port, QObject *parent) : QObject(parent)
 {
+    cHost = host;
+    cPort = port;
+
     socket = new QTcpSocket(this);
     socket->connectToHost(QHostAddress(host), port);
+
+    voiceSock = new QTcpSocket(this);
 
     blockSize = 0;
     isLoggedIn = false;
 
     connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
+    connect(voiceSock, SIGNAL(readyRead()),this,SLOT(readVoice()));
 }
 
 void Client::readyRead()
 {
-    blockSize = 0;
     QDataStream in(socket);
     if (blockSize == 0) {
         if (socket->bytesAvailable() < (int)sizeof(quint16))
@@ -21,13 +26,13 @@ void Client::readyRead()
             return;
         }
         in >> blockSize;
-
+        qDebug() << "block " << blockSize;
+        qDebug() << socket->bytesAvailable();
     }
-    qDebug() << blockSize;
-    qDebug() << socket->bytesAvailable();
     if (socket->bytesAvailable() < blockSize)
         return;
     else
+
         blockSize = 0;
 
     quint8 command;
@@ -39,11 +44,14 @@ void Client::readyRead()
     {
         emit this->succLogin();
         isLoggedIn = true;
+        voiceSock->connectToHost(cHost,cPort);
+        addVoiceSock();
         break;
     }
     case sClient::c_unSucc_L:
     {
         emit this->unSuccLogin();
+        userName = "NULL";
         break;
     }
     case sClient::c_Succ_Reg:
@@ -54,13 +62,6 @@ void Client::readyRead()
     case sClient::c_unSucc_R:
     {
         emit this->unSuccReg();
-        break;
-    }
-    case sClient::c_voice_say:
-    {
-        QByteArray dat;
-        in >> dat;
-        output.writeData(dat);
         break;
     }
     default:
@@ -81,8 +82,21 @@ void Client::sendBlock(quint8 command, dataBlock data)
     socket->write(block);
 }
 
+void Client::addVoiceSock()
+{
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out << (quint16)0;
+    out << sClient::c_voice_say;
+    out << userName;
+    out.device()->seek(0);
+    out << (quint16)(block.size() - sizeof(quint16));
+    voiceSock->write(block);
+}
+
 void Client::login(QString login, QString password)
 {
+    userName = login;
     QString lp(login);
     lp.append(lpsep);
     lp.append(password);
@@ -100,15 +114,18 @@ void Client::reg(QString login, QString password)
 
 void Client::voiceSay(QByteArray data)
 {
-    sendVoice(data);
+    if (voiceSock)
+        voiceSock->write(data);
 }
 
-void Client::sendVoice(QByteArray data)
+void Client::readVoice()
 {
-    QByteArray block;
-    QDataStream out(&block, QIODevice::WriteOnly);
-    out << (quint16)0 << sClient::c_voice_say << data;
-    out.device()->seek(0);
-    out << (quint16)(block.size() - sizeof(quint16));
-    socket->write(block);
+    QByteArray voice;
+
+    if(voiceSock->bytesAvailable() > 0)
+    {
+        voice.append(voiceSock->readAll());
+        output.writeData(voice);
+        qDebug() << "vss";
+    }
 }

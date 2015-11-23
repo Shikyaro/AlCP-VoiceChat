@@ -18,6 +18,7 @@ class sClient : public QObject
     Q_OBJECT
 private:
     QTcpSocket  *socket;
+    QTcpSocket  *voiceSock;
     Server      *server;
     quint16     blockSize;
     bool        isLoggedIn;
@@ -45,12 +46,17 @@ public:
     bool        getLoggedIn()   {return isLoggedIn;}
 
     void        sendBlock(quint8 command, QByteArray data);
+    void        sendVoice(QByteArray data);
+
+    void        setVoiceSocket(QTcpSocket* sock);
 signals:
     void        userDisconnected(sClient* client);
+    void        addVoiceSocket(sClient* cliToDel, QString username, QTcpSocket* sck);
 
 private slots:
     void        onDisconnect();
     void        onReadyRead();
+    void        onReadyVoice();
 };
 
 #endif // SCLIENT_H

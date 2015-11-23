@@ -23,6 +23,7 @@ void Server::incomingConnection(qintptr handle)
      sClient *client = new sClient(handle, this, this);
 
      connect(client,SIGNAL(userDisconnected(sClient*)),this,SLOT(onUserDisconnected(sClient*)));
+     connect(client,SIGNAL(addVoiceSocket(sClient*,QString,QTcpSocket*)),this,SLOT(onVoiceSocket(sClient*,QString,QTcpSocket*)));
 
      cliList.append(client);
 
@@ -49,4 +50,28 @@ void Server::sendToAll(quint8 command, QByteArray data, QString senderName, bool
         }
     }
 }
+
+void Server::onVoiceSocket(sClient *cliToDel, QString username, QTcpSocket *sck)
+{
+    sClient *cli;
+
+    foreach (cli, cliList) {
+        if (cli->getName()==username)
+            cli->setVoiceSocket(sck);
+    }
+
+    cliList.removeAt(cliList.indexOf(cliToDel));
+}
+
+void Server::sendVoiceToAll(QByteArray voice, QString senderName)
+{
+    sClient *cli;
+    foreach (cli, cliList) {
+        if(cli->getName()!=senderName)
+            if(cli->getLoggedIn())
+                cli->sendVoice(voice);
+    }
+
+}
+
 

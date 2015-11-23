@@ -45,21 +45,23 @@ MainWindow::~MainWindow()
 
 void MainWindow::bClicked()
 {
-    QAudioDeviceInfo devinfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput).at(0);
-    input = new AudioInput(devinfo, this);
-    connect(input, SIGNAL(dataReady(QByteArray)), client, SLOT(voiceSay(QByteArray)));
+
 }
 
 void MainWindow::succLogin()
 {
     ldialog->close();
     this->setEnabled(true);
+
+    QAudioDeviceInfo devinfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput).at(0);
+    input = new AudioInput(devinfo, this);
+    connect(input, SIGNAL(dataReady(QByteArray)), client, SLOT(voiceSay(QByteArray)));
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
     if(obj == this && event->type() == QEvent::Close){
-        event->ignore();
+        //event->ignore();
         this->showMinimized();
         return true;
     }else{

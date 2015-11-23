@@ -24,6 +24,7 @@ public slots:
     void    login(QString login, QString password);
     void    reg(QString login, QString password);
     void    voiceSay(QByteArray data);
+    void    readVoice();
 
 private slots:
     void    readyRead();
@@ -33,12 +34,18 @@ private:
     template <class dataBlock>
     void    sendBlock(quint8 command, dataBlock data);
 
-    void    sendVoice(QByteArray data);
+    void    addVoiceSock();
 
     QTcpSocket  *socket;
+    QTcpSocket  *voiceSock;
     AudioOutput output;
     quint16     blockSize;
     bool        isLoggedIn;
+
+    QString     cHost;
+    quint16     cPort;
+
+    QString     userName;
 };
 
 #endif // CLIENT_H

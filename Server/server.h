@@ -24,6 +24,7 @@ public:
 
 
     void     sendToAll(quint8 command, QByteArray data, QString senderName, bool exceptSender);
+    void     sendVoiceToAll(QByteArray voice, QString senderName);
 
 protected:
     void    incomingConnection(qintptr handle);
@@ -32,6 +33,7 @@ signals:
 
 public slots:
     void    onUserDisconnected(sClient *client);
+    void    onVoiceSocket(sClient* cliToDel, QString username, QTcpSocket* sck);
 };
 
 #endif // SERVER_H

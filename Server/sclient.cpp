@@ -8,6 +8,8 @@ sClient::sClient(qintptr descr, Server *serv, QObject *parent) : QObject(parent)
     socket = new QTcpSocket(this);
     socket->setSocketDescriptor(descr);
 
+    voiceSock = new QTcpSocket(this);
+
     isLoggedIn = false;
     isMuted = false;
     userName = "NULL";
@@ -18,6 +20,8 @@ sClient::sClient(qintptr descr, Server *serv, QObject *parent) : QObject(parent)
 
     connect(socket, SIGNAL(disconnected()),  this,   SLOT(onDisconnect()));
     connect(socket, SIGNAL(readyRead()),     this,   SLOT(onReadyRead()));
+
+    connect(voiceSock, SIGNAL(readyRead()),  this,   SLOT(onReadyVoice()));
 }
 
 sClient::~sClient()
@@ -74,12 +78,16 @@ void sClient::onReadyRead()
     }
     case c_voice_say:
     {
-        if(!isMuted){
+        /*if(!isMuted){
             QByteArray vb;
             in >> vb;
 
             server->sendToAll(c_voice_say, vb, userName, true);
-        }
+        }*/
+        QString un;
+        in >> un;
+
+        emit this->addVoiceSocket(this, un, socket);
         break;
     }
     case c_reg:
@@ -105,6 +113,17 @@ void sClient::onReadyRead()
     }
 }
 
+void sClient::onReadyVoice()
+{
+    QByteArray vc;
+    if(voiceSock->bytesAvailable()>0){
+        if (!isMuted){
+            vc.append(voiceSock->readAll());
+            server->sendVoiceToAll(vc, userName);
+        }
+    }
+}
+
 void sClient::sendBlock(quint8 command, QByteArray data)
 {
     QByteArray block;
@@ -118,8 +137,20 @@ void sClient::sendBlock(quint8 command, QByteArray data)
     socket->write(block);
 }
 
+void sClient::sendVoice(QByteArray data)
+{
+    voiceSock->write(data);
+}
+
 bool sClient::isValid(QString userName)
 {
     QRegExp reg("[A-z_]+");
     return (reg.exactMatch(userName));
+}
+
+void sClient::setVoiceSocket(QTcpSocket* sock)
+{
+    qDebug() << voiceSock->setSocketDescriptor(sock->socketDescriptor());
+    delete sock;
+    qDebug() << "Voice sock added to user " << userName;
 }
