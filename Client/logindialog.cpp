@@ -9,7 +9,7 @@ LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent)
     pass->setMaxLength(25);
 
     reg = new QPushButton("Регистрация");
-    log = new QPushButton("Вход");
+    log = new QPushButton("Вход: ");
     exit = new QPushButton("Выход");
 
     QGridLayout *mLay = new QGridLayout(this);

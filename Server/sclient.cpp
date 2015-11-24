@@ -98,7 +98,7 @@ void sClient::onReadyRead()
 
         lp = logp.split(lpsep);
 
-        if ((isValid(lp.at(0)))){
+        if ((isValid(lp.at(0)))){ 
             if((server->db->newUser(lp.at(0),lp.at(1))))
                 sendBlock(c_Succ_Reg,NULL);
             else

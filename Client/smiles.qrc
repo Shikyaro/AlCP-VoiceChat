@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>smiles/cat_head.png</file>
+    </qresource>
+</RCC>

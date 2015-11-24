@@ -129,3 +129,14 @@ void Client::readVoice()
         qDebug() << "vss";
     }
 }
+
+void Client::stringParser(QString str)
+{
+    QString endStr = str;
+    if(endStr[1]=='/')
+    {
+
+    }else{
+        endStr.replace("<sm>cat</sm>","<img src=qrc:/smiles/cat_head.png>",Qt::CaseInsensitive);
+    }
+}

@@ -7,30 +7,37 @@
 #include <QMessageBox>
 #include <QString>
 #include <QLineEdit>
+#include <QListWidget>
 #include "audioinput.h"
 #include "audiooutput.h"
 #include "logindialog.h"
-
+#include <QTextBrowser>
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 private:
-    QPushButton *mbut;
     Client *client;
     AudioInput *input;
     QWidget *cw;
-    QVBoxLayout *ml;
-    QLineEdit *ql;
-    QLineEdit *ip;
+    QListWidget *userWidget;
+    QHBoxLayout *ml;
+    QGridLayout *mlay;
     LoginDialog *ldialog;
+    QTextBrowser *chatWidget;
+
+    QLineEdit *chatLine;
+    QPushButton *chatBut;
+
+
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 private slots:
-    void bClicked();
+    void sendMessage();
 public slots:
     void succLogin();
+    void newMessage(QString username, QString message, QString col);
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 };

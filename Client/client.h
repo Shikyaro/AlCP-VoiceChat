@@ -19,12 +19,15 @@ signals:
     void    unSuccLogin();
     void    succReg();
     void    unSuccReg();
+    void    newMessage(QString uname, QString msg, QString clr);
 
 public slots:
     void    login(QString login, QString password);
     void    reg(QString login, QString password);
     void    voiceSay(QByteArray data);
     void    readVoice();
+
+    void    stringParser(QString str);
 
 private slots:
     void    readyRead();

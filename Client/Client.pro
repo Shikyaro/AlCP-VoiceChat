@@ -25,3 +25,6 @@ HEADERS  += mainwindow.h \
     client.h \
     audioinput.h \
     logindialog.h
+
+RESOURCES += \
+    smiles.qrc

@@ -41,6 +41,15 @@ public:
     static const quint8 c_Succ_Reg  = (quint8)203;
     static const quint8 c_unSucc_R  = (quint8)204;
 
+    static const quint8 c_message   = (quint8)4;
+    static const quint8 c_ban       = (quint8)5;
+    static const quint8 c_mute      = (quint8)6;
+    static const quint8 c_chperm    = (quint8)7;
+    static const quint8 c_unban     = (quint8)9;
+    static const quint8 c_unmute    = (quint8)10;
+    static const quint8 c_kick      = (quint8)11;
+    static const quint8 c_err_mess  = (quint8)12;
+
 
     QString     getName()       {return userName;}
     bool        getLoggedIn()   {return isLoggedIn;}
