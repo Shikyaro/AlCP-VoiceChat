@@ -6,6 +6,7 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QVariant>
+#include <QDateTime>
 #include <QDebug>
 
 class database : public QObject
@@ -17,6 +18,15 @@ public:
     uint getPower(QString userName);
     bool authorize(QString userName, QString password);
     bool newUser(QString userName, QString password);
+    bool ban(QString username, QDateTime bantime);
+    bool mute(QString username, QDateTime mutetime);
+    bool isBanned(QString username);
+    bool isMuted(QString username);
+    bool unMute(QString username);
+    bool unBan(QString username);
+    QDateTime getBanTime(QString username);
+    QDateTime getMuteTime(QString username);
+    QString getColor(QString userName);
     ~database();
 
 signals:

@@ -3,6 +3,8 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    this->setWindowTitle("AlCPVC by Alkor Shikyaro");
+
     this->installEventFilter(this);
 
     mlay = new QGridLayout();
@@ -18,7 +20,11 @@ MainWindow::MainWindow(QWidget *parent)
     ml->addWidget(chatLine);
     ml->addWidget(chatBut);
 
+    chatBut->setDefault(true);
+
+
     cw = new QWidget();
+
     mlay->addWidget(chatWidget,0,0);
     mlay->addWidget(userWidget,0,1);
     mlay->addLayout(ml,1,0);
@@ -30,7 +36,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(client,SIGNAL(succLogin()),this,SLOT(succLogin()));
 
     //this->setEnabled(false);
-
     ldialog = new LoginDialog(this);
     ldialog->show();
 
@@ -42,11 +47,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(client,SIGNAL(unSuccLogin()),ldialog,SLOT(onUnSuccLogin()));
     connect(client,SIGNAL(succLogin()),this,SLOT(succLogin()));
     connect(client,SIGNAL(newMessage(QString,QString,QString)),this,SLOT(newMessage(QString,QString,QString)));
+    connect(client,SIGNAL(nUser(QString)),this,SLOT(newUser(QString)));
+    connect(client,SIGNAL(dUser(QString)),this,SLOT(userDisc(QString)));
+    connect(client,SIGNAL(userList(QStringList)),this,SLOT(drawUserList(QStringList)));
 
     connect(chatBut,SIGNAL(clicked(bool)),this,SLOT(sendMessage()));
 
-    this->newMessage("Admin","<img src=qrc:/smiles/cat_head.png>"
-                             " test_mess аыоваоывоадфываывлаодывоадвыо","red");
 }
 
 
@@ -67,22 +73,34 @@ void MainWindow::succLogin()
     connect(input, SIGNAL(dataReady(QByteArray)), client, SLOT(voiceSay(QByteArray)));
 }
 
-bool MainWindow::eventFilter(QObject *obj, QEvent *event)
-{
-    if(obj == this && event->type() == QEvent::Close){
-        //event->ignore();
-        this->showMinimized();
-        return true;
-    }else{
-        return false;
-    }
-}
 void MainWindow::newMessage(QString username, QString message, QString col)
 {
     chatWidget->append(tr("<font color = '%3'>[%1]: %2</font>").arg(username, message, col));
 }
 void MainWindow::sendMessage()
 {
-    client->stringParser(chatLine->text());
+    if(chatLine->text()!="")
+        client->stringParser(chatLine->text());
     chatLine->clear();
+
+}
+void MainWindow::newUser(QString username)
+{
+    userWidget->addItem(username);
+}
+
+void MainWindow::userDisc(QString username)
+{
+    delete userWidget->findItems(username,Qt::MatchExactly).at(0);
+}
+
+void MainWindow::drawUserList(QStringList ulist)
+{
+    QString str;
+
+    foreach (str, ulist) {
+        if(str!=""){
+            newUser(str);
+        }
+    }
 }

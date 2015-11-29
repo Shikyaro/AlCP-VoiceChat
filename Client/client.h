@@ -20,13 +20,15 @@ signals:
     void    succReg();
     void    unSuccReg();
     void    newMessage(QString uname, QString msg, QString clr);
+    void    nUser(QString uname);
+    void    dUser(QString uname);
+    void    userList(QStringList usrs);
 
 public slots:
     void    login(QString login, QString password);
     void    reg(QString login, QString password);
     void    voiceSay(QByteArray data);
     void    readVoice();
-
     void    stringParser(QString str);
 
 private slots:

@@ -46,6 +46,7 @@ void Client::readyRead()
         isLoggedIn = true;
         voiceSock->connectToHost(cHost,cPort);
         addVoiceSock();
+        sendBlock(sClient::c_onList,NULL);
         break;
     }
     case sClient::c_unSucc_L:
@@ -64,6 +65,41 @@ void Client::readyRead()
         emit this->unSuccReg();
         break;
     }
+    case sClient::c_message:
+    {
+        QString unme;
+        QStringList mslist;
+        in >> unme;
+        mslist = unme.split(mssep);
+        this->newMessage(mslist.at(0), mslist.at(1), mslist.at(2));
+        break;
+    }
+    case sClient::c_userConn:
+    {
+        QString uname;
+        in >> uname;
+
+        emit this->nUser(uname);
+        break;
+    }
+    case sClient::c_userDisc:
+    {
+        QString uname;
+        in >> uname;
+
+        emit this->dUser(uname);
+        break;
+    }
+    case sClient::c_onList:
+    {
+        QString usrs;
+        in >> usrs;
+        qDebug() << usrs;
+        QStringList uList;
+        uList = usrs.split(",");
+
+        emit this->userList(uList);
+    }
     default:
         break;
     }
@@ -76,7 +112,9 @@ void Client::sendBlock(quint8 command, dataBlock data)
     QDataStream out(&block, QIODevice::WriteOnly);
     out << (quint16)0;
     out << command;
-    out << data;
+    if (data!=NULL){
+        out << data;
+    }
     out.device()->seek(0);
     out << (quint16)(block.size() - sizeof(quint16));
     socket->write(block);
@@ -126,17 +164,36 @@ void Client::readVoice()
     {
         voice.append(voiceSock->readAll());
         output.writeData(voice);
-        qDebug() << "vss";
     }
 }
 
 void Client::stringParser(QString str)
 {
     QString endStr = str;
-    if(endStr[1]=='/')
+    QStringList commSyn;
+    if(endStr[0]=='/')
     {
+        if (endStr.startsWith("/ban",Qt::CaseInsensitive)){
+            commSyn = endStr.split(" ");
+            QString comst;
+            comst.append(commSyn.at(1));
+            comst.append(",");
+            comst.append(commSyn.at(2));
 
+            sendBlock(sClient::c_ban, comst);
+        }else if(endStr.startsWith("/mute",Qt::CaseInsensitive)){
+            commSyn = endStr.split(" ");
+            QString comst;
+            comst.append(commSyn.at(1));
+            comst.append(",");
+            comst.append(commSyn.at(2));
+
+            sendBlock(sClient::c_mute, comst);
+        }
     }else{
-        endStr.replace("<sm>cat</sm>","<img src=qrc:/smiles/cat_head.png>",Qt::CaseInsensitive);
+        endStr.replace("<sm=cat>","<img src=qrc:/smiles/cat_head.png>",Qt::CaseInsensitive);
+
+
+        sendBlock(sClient::c_message, endStr);
     }
 }

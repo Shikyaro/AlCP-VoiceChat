@@ -12,6 +12,11 @@ Server::Server(quint16 port, QObject *parent) : QTcpServer(parent)
         qDebug() << "БД подключено";
     else
         qDebug() << "БД не подключено!!!!";
+
+    muteBanTimer = new QTimer();
+    muteBanTimer->start(10000);
+
+    connect(muteBanTimer,SIGNAL(timeout()),this,SLOT(checkMute()));
 }
 
 Server::~Server()
@@ -71,6 +76,51 @@ void Server::sendVoiceToAll(QByteArray voice, QString senderName)
             if(cli->getLoggedIn())
                 cli->sendVoice(voice);
     }
+
+}
+
+QString Server::sendOnline(sClient *cli)
+{
+    QString users;
+    QByteArray data;
+    QDataStream out(&data,QIODevice::WriteOnly);
+    for (uint i = 0; i<cliList.length(); i++)
+    {
+        if(cli->getName()!=cliList.at(i)->getName() && cliList.at(i)->getName()!= "NULL")
+        {
+            users.append(cliList.at(i)->getName());
+            users.append(",");
+        }
+    }
+    users.remove(users.length()-1,1);
+
+    return users;
+}
+
+void Server::checkMute()
+{
+    sClient *cli;
+    foreach (cli, cliList) {
+        if(cli->getName()!=NULL)
+            if((cli->getMuted())||(db->isMuted(cli->getName())))
+                if(QDateTime::currentDateTime() > db->getMuteTime(cli->getName())){
+                    db->unMute(cli->getName());
+                    cli->setMuted(false);
+                }
+    }
+}
+
+void Server::mute(QString username, uint secs)
+{
+    db->mute(username,QDateTime::currentDateTime().addSecs(secs));
+
+    sClient *cli;
+
+    foreach (cli, cliList) {
+        if(cli->getName()==username)
+            cli->setMuted(true);
+    }
+
 
 }
 

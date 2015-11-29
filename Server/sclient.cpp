@@ -32,6 +32,12 @@ sClient::~sClient()
 void sClient::onDisconnect()
 {
     if (isLoggedIn){
+        QByteArray data;
+        QDataStream out(&data, QIODevice::WriteOnly);
+
+        out << this->userName;
+
+        server->sendToAll(sClient::c_userDisc,data,this->userName,true);
         emit userDisconnected(this);
     }else{
         deleteLater();
@@ -67,9 +73,20 @@ void sClient::onReadyRead()
         lp = logp.split(lpsep);
 
         if (server->db->authorize(lp.at(0),lp.at(1))){
-            userName = lp.at(0);
-            isLoggedIn = true;
-            sendBlock(sClient::c_SuccLogin,NULL);
+            if(!server->db->isBanned(lp.at(0))){
+                QByteArray data;
+                QDataStream out(&data,QIODevice::WriteOnly);
+                userName = lp.at(0);
+                out << userName;
+                isLoggedIn = true;
+                sendBlock(sClient::c_SuccLogin,NULL);
+                server->sendToAll(sClient::c_userConn, data, this->userName,true);
+                isMuted=server->db->isMuted(this->userName);
+            }else{
+                if(QDateTime::currentDateTime()>=server->db->getBanTime(lp.at(0)))
+                    server->db->unBan(lp.at(0));
+                socket->disconnectFromHost();
+            }
         }else{
             sendBlock(sClient::c_unSucc_L,NULL);
         }
@@ -78,12 +95,6 @@ void sClient::onReadyRead()
     }
     case c_voice_say:
     {
-        /*if(!isMuted){
-            QByteArray vb;
-            in >> vb;
-
-            server->sendToAll(c_voice_say, vb, userName, true);
-        }*/
         QString un;
         in >> un;
 
@@ -108,18 +119,82 @@ void sClient::onReadyRead()
         }
         break;
     }
+    case c_message:
+        if(isLoggedIn){
+            if (!isMuted){
+                QString msg;
+                QString mss;
+                in >> msg;
+                QByteArray data;
+                QDataStream out(&data, QIODevice::WriteOnly);
+                //mss.append(mssep);
+                mss.append(userName);
+                mss.append(mssep);
+                mss.append(msg);
+                mss.append(mssep);
+                mss.append(server->db->getColor(userName));
+                out << mss;
+                server->sendToAll(c_message,data,userName,false);
+            }else{
+
+            }
+        }
+        break;
+    case c_onList:
+    {
+        sendOnline();
+        break;
+    }
+    case c_ban:
+    {
+        if (server->db->getPower(this->userName)>=banpower)
+        {
+            QString uname;
+            in >> uname;
+            //qDebug() << uname;
+
+        }
+        else
+        {
+            //sendBlock(c_err_mess,);
+        }
+        break;
+    }
+    case c_mute:
+    {
+        if (server->db->getPower(this->userName)>=mutepower)
+        {
+            QString ucom;
+            QStringList comlst;
+
+            in >> ucom;
+            comlst = ucom.split(",");
+
+            if (server->db->getPower(this->userName)>server->db->getPower(comlst.at(0)))
+                server->mute(comlst.at(0),QString(comlst.at(1)).toUInt());
+            else
+            {
+
+            }
+        }
+        break;
+    }
     default:
         break;
     }
+
 }
 
 void sClient::onReadyVoice()
 {
-    QByteArray vc;
-    if(voiceSock->bytesAvailable()>0){
-        if (!isMuted){
-            vc.append(voiceSock->readAll());
-            server->sendVoiceToAll(vc, userName);
+    if(!isMuted)
+    {
+        QByteArray vc;
+        if(voiceSock->bytesAvailable()>0){
+            if (!isMuted){
+                vc.append(voiceSock->readAll());
+                server->sendVoiceToAll(vc, userName);
+            }
         }
     }
 }
@@ -129,9 +204,10 @@ void sClient::sendBlock(quint8 command, QByteArray data)
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
     out << (quint16)0;
-    out << (quint8)command;
+    out << command;
     if (data != NULL)
-        out << data;
+        //out << data;
+        block.append(data);
     out.device()->seek(0);
     out << (quint16)(block.size() - sizeof(quint16));
     socket->write(block);
@@ -150,7 +226,13 @@ bool sClient::isValid(QString userName)
 
 void sClient::setVoiceSocket(QTcpSocket* sock)
 {
-    qDebug() << voiceSock->setSocketDescriptor(sock->socketDescriptor());
-    delete sock;
-    qDebug() << "Voice sock added to user " << userName;
+    voiceSock->setSocketDescriptor(sock->socketDescriptor());
+}
+void sClient::sendOnline()
+{
+    QByteArray udata;
+    QDataStream uOut(&udata,QIODevice::WriteOnly);
+
+    uOut << server->sendOnline(this);
+    this->sendBlock(c_onList, udata);
 }

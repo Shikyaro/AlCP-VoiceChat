@@ -2,6 +2,11 @@
 #define SCLIENT_H
 
 #define lpsep QChar(0344)
+#define mssep QChar(0345)
+
+#define banpower int(49)
+#define mutepower int(24)
+#define kickpower int(24)
 
 #include <QObject>
 #include <QtNetwork>
@@ -27,6 +32,7 @@ private:
     bool        isMuted;
 
     bool        isValid(QString userName);
+    void        sendOnline();
 public:
     explicit sClient(qintptr descr, Server *serv, QObject *parent = 0);
     ~sClient();
@@ -50,9 +56,17 @@ public:
     static const quint8 c_kick      = (quint8)11;
     static const quint8 c_err_mess  = (quint8)12;
 
+    static const quint8 c_userConn  = (quint8)13;
+    static const quint8 c_userDisc  = (quint8)14;
+
+    static const quint8 c_onList    = (quint8)15;
+
 
     QString     getName()       {return userName;}
     bool        getLoggedIn()   {return isLoggedIn;}
+    bool        getMuted()      {return isMuted;}
+
+    void        setMuted(bool ism) {isMuted = ism;}
 
     void        sendBlock(quint8 command, QByteArray data);
     void        sendVoice(QByteArray data);

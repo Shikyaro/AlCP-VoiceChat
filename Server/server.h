@@ -5,6 +5,7 @@
 #include <QList>
 #include <QtNetwork>
 #include <QDebug>
+#include <QTimer>
 #include "sclient.h"
 #include "database.h"
 
@@ -17,6 +18,7 @@ class Server : public QTcpServer
 private:
     QList<sClient *> cliList;
     database *db;
+    QTimer *muteBanTimer;
 
 public:
     explicit Server(quint16 port, QObject *parent = 0);
@@ -25,6 +27,8 @@ public:
 
     void     sendToAll(quint8 command, QByteArray data, QString senderName, bool exceptSender);
     void     sendVoiceToAll(QByteArray voice, QString senderName);
+    QString  sendOnline(sClient* cli);
+    void     mute(QString username, uint secs);
 
 protected:
     void    incomingConnection(qintptr handle);
@@ -34,6 +38,8 @@ signals:
 public slots:
     void    onUserDisconnected(sClient *client);
     void    onVoiceSocket(sClient* cliToDel, QString username, QTcpSocket* sck);
+private slots:
+    void    checkMute();
 };
 
 #endif // SERVER_H

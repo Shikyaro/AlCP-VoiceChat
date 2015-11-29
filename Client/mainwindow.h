@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QMessageBox>
 #include <QString>
 #include <QLineEdit>
@@ -12,6 +13,8 @@
 #include "audiooutput.h"
 #include "logindialog.h"
 #include <QTextBrowser>
+#include <exception>
+#include <QException>
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -38,8 +41,11 @@ private slots:
 public slots:
     void succLogin();
     void newMessage(QString username, QString message, QString col);
+    void newUser(QString username);
+    void userDisc(QString username);
+    void drawUserList(QStringList ulist);
+    //void error(QString text);
 protected:
-    bool eventFilter(QObject *obj, QEvent *event);
 };
 
 #endif // MAINWINDOW_H
