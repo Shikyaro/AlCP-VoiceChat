@@ -85,7 +85,7 @@ void sClient::onReadyRead()
             }else{
                 if(QDateTime::currentDateTime()>=server->db->getBanTime(lp.at(0)))
                     server->db->unBan(lp.at(0));
-                socket->disconnectFromHost();
+                sendBlock(sClient::c_ban,NULL);
             }
         }else{
             sendBlock(sClient::c_unSucc_L,NULL);
@@ -151,8 +151,17 @@ void sClient::onReadyRead()
         {
             QString uname;
             in >> uname;
-            //qDebug() << uname;
 
+            QStringList comList;
+
+            comList = uname.split(",");
+
+            if (server->db->getPower(this->userName)>server->db->getPower(comList.at(0)))
+                server->ban(comList.at(0),QString(comList.at(1)).toUInt());
+            else
+            {
+
+            }
         }
         else
         {
@@ -179,9 +188,34 @@ void sClient::onReadyRead()
         }
         break;
     }
+    case c_kick:
+    {
+        if (server->db->getPower(this->userName)>=kickpower)
+        {
+            QString ucom;
+
+            in >> ucom;
+            qDebug() << ucom;
+
+            if (server->db->getPower(this->userName)>server->db->getPower(ucom))
+                server->kick(ucom);
+            else
+            {
+
+            }
+        }
+        break;
+    }
     default:
         break;
     }
+
+}
+
+void sClient::kick()
+{
+    voiceSock->disconnectFromHost();
+    socket->disconnectFromHost();
 
 }
 

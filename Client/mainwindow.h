@@ -45,6 +45,7 @@ public slots:
     void userDisc(QString username);
     void drawUserList(QStringList ulist);
     //void error(QString text);
+    void onDisc();
 protected:
 };
 

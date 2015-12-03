@@ -24,11 +24,13 @@ public:
     explicit Server(quint16 port, QObject *parent = 0);
     ~Server();
 
-
+    bool     startServer(quint16 port);
     void     sendToAll(quint8 command, QByteArray data, QString senderName, bool exceptSender);
     void     sendVoiceToAll(QByteArray voice, QString senderName);
     QString  sendOnline(sClient* cli);
     void     mute(QString username, uint secs);
+    void     ban(QString username, uint secs);
+    void     kick(QString username);
 
 protected:
     void    incomingConnection(qintptr handle);

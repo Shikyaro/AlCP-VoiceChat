@@ -14,15 +14,19 @@ class Client : public QObject
 public:
     explicit Client(QString host, quint16 port, QObject *parent = 0);
 
+    bool    connectToSrv(QString host, quint16 port);
+
 signals:
     void    succLogin();
     void    unSuccLogin();
     void    succReg();
     void    unSuccReg();
+    void    isBanned();
     void    newMessage(QString uname, QString msg, QString clr);
     void    nUser(QString uname);
     void    dUser(QString uname);
     void    userList(QStringList usrs);
+    void    disc();
 
 public slots:
     void    login(QString login, QString password);
@@ -33,6 +37,7 @@ public slots:
 
 private slots:
     void    readyRead();
+    void    onDisconnect();
 
 private:
 

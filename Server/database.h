@@ -11,6 +11,7 @@
 
 class database : public QObject
 {
+    friend class Server;
     Q_OBJECT
 public:
     explicit database(QObject *parent = 0);

@@ -2,27 +2,39 @@
 
 Server::Server(quint16 port, QObject *parent) : QTcpServer(parent)
 {
-    if (listen(QHostAddress::Any,port))
-        qDebug() << "Сервер запущен" << endl;
-    else
-        qDebug() << "NOt started" << endl;
-
     db = new database(this);
     if(db->initialize("127.0.0.1","alcpvc","root","alcpvc"))
         qDebug() << "БД подключено";
     else
         qDebug() << "БД не подключено!!!!";
-
-    muteBanTimer = new QTimer();
-    muteBanTimer->start(10000);
-
-    connect(muteBanTimer,SIGNAL(timeout()),this,SLOT(checkMute()));
 }
 
 Server::~Server()
 {
 
 }
+
+bool Server::startServer(quint16 port)
+{
+    if(db->db.isOpen()){
+        if ((!isListening())&&(listen(QHostAddress::Any,port)))
+        {
+            qDebug() << "Сервер запущен" << endl;
+            muteBanTimer = new QTimer();
+            muteBanTimer->start(10000);
+            connect(muteBanTimer,SIGNAL(timeout()),this,SLOT(checkMute()));
+            return true;
+        }
+        else
+        {
+            qDebug() << "Start error!" << endl;
+            return false;
+        }
+    }else{
+        return false;
+    }
+}
+
 void Server::incomingConnection(qintptr handle)
 {
      sClient *client = new sClient(handle, this, this);
@@ -120,8 +132,23 @@ void Server::mute(QString username, uint secs)
         if(cli->getName()==username)
             cli->setMuted(true);
     }
+}
 
+void Server::ban(QString username, uint secs)
+{
+    db->ban(username,QDateTime::currentDateTime().addSecs(secs));
 
+    kick(username);
+}
+
+void Server::kick(QString username)
+{
+    sClient *cli;
+
+    foreach (cli, cliList) {
+        if(cli->getName()==username)
+            cli->kick();
+    }
 }
 
 

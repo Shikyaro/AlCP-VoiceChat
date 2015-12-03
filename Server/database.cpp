@@ -86,14 +86,14 @@ bool database::newUser(QString userName, QString password)
 bool database::ban(QString username, QDateTime bantime)
 {
     QSqlQuery que;
-    que.prepare(QString("UPDATE users"
-                        "SET banned = 1, banend = \"%1-%2-%3 %4:%5:%6\""
-                        "WHERE username = %7").arg(QString(bantime.date().year()),
-                                                   QString(bantime.date().month()),
-                                                   QString(bantime.date().day()),
-                                                   QString(bantime.time().hour()),
-                                                   QString(bantime.time().minute()),
-                                                   QString(bantime.time().second()),
+    que.prepare(QString("UPDATE users "
+                        "SET banned = 1, banend = '%1-%2-%3 %4:%5:%6' "
+                        "WHERE username = '%7'").arg(tr("%1").arg(bantime.date().year()),
+                                                   tr("%1").arg(bantime.date().month()),
+                                                   tr("%1").arg(bantime.date().day()),
+                                                   tr("%1").arg(bantime.time().hour()),
+                                                   tr("%1").arg(bantime.time().minute()),
+                                                   tr("%1").arg(bantime.time().second()),
                                                    username));
     if(que.exec())
         return true;

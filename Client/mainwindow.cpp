@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(client,SIGNAL(succLogin()),this,SLOT(succLogin()));
 
     //this->setEnabled(false);
-    ldialog = new LoginDialog(this);
+    ldialog = new LoginDialog(client,this);
     ldialog->show();
 
     connect(ldialog,SIGNAL(s_log(QString,QString)),client,SLOT(login(QString,QString)));
@@ -50,6 +50,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(client,SIGNAL(nUser(QString)),this,SLOT(newUser(QString)));
     connect(client,SIGNAL(dUser(QString)),this,SLOT(userDisc(QString)));
     connect(client,SIGNAL(userList(QStringList)),this,SLOT(drawUserList(QStringList)));
+    connect(client,SIGNAL(isBanned()),ldialog,SLOT(onBan()));
+
+    connect(client,SIGNAL(disc()),this,SLOT(onDisc()));
 
     connect(chatBut,SIGNAL(clicked(bool)),this,SLOT(sendMessage()));
 
@@ -62,6 +65,11 @@ MainWindow::~MainWindow()
 
 }
 
+void MainWindow::onDisc()
+{
+    QTimer::singleShot(10000,this,SLOT(close()));
+    QMessageBox::warning(this,"Разрыв соединения","Сервер разорвал соединение");
+}
 
 void MainWindow::succLogin()
 {

@@ -11,12 +11,13 @@
 #include <QHBoxLayout>
 #include <QMainWindow>
 #include <QMessageBox>
+#include "client.h"
 
 class LoginDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit LoginDialog(QWidget *parent = 0);
+    explicit LoginDialog(Client *cli, QWidget *parent = 0);
 
 signals:
     void s_log(QString log, QString pass);
@@ -26,6 +27,7 @@ signals:
 public slots:
     void onUnSuccLogin();
     void onUnSuccReg();
+    void onBan();
 
 private:
     QTabWidget  *mainWid;
@@ -36,6 +38,11 @@ private:
 
     QLineEdit   *login;
     QLineEdit   *pass;
+    QLineEdit   *ip;
+    QLineEdit   *port;
+
+    bool        isConnected;
+    Client      *client;
 private slots:
     void onReg();
     void onLog();

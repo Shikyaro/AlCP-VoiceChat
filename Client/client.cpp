@@ -2,11 +2,11 @@
 
 Client::Client(QString host, quint16 port, QObject *parent) : QObject(parent)
 {
-    cHost = host;
-    cPort = port;
 
     socket = new QTcpSocket(this);
-    socket->connectToHost(QHostAddress(host), port);
+
+
+
 
     voiceSock = new QTcpSocket(this);
 
@@ -14,6 +14,7 @@ Client::Client(QString host, quint16 port, QObject *parent) : QObject(parent)
     isLoggedIn = false;
 
     connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
+    connect(socket,SIGNAL(disconnected()),this,SLOT(onDisconnect()));
     connect(voiceSock, SIGNAL(readyRead()),this,SLOT(readVoice()));
 }
 
@@ -99,10 +100,23 @@ void Client::readyRead()
         uList = usrs.split(",");
 
         emit this->userList(uList);
+        break;
+    }
+    case sClient::c_ban:
+    {
+        emit this->isBanned();
+        break;
     }
     default:
         break;
     }
+}
+
+void Client::onDisconnect()
+{
+    if(voiceSock->isOpen())
+        voiceSock->disconnectFromHost();
+    emit this->disc();
 }
 
 template <class dataBlock>
@@ -118,6 +132,11 @@ void Client::sendBlock(quint8 command, dataBlock data)
     out.device()->seek(0);
     out << (quint16)(block.size() - sizeof(quint16));
     socket->write(block);
+}
+
+bool Client::connectToSrv(QString host, quint16 port)
+{
+    socket->connectToHost(QHostAddress(host), port);
 }
 
 void Client::addVoiceSock()
@@ -189,6 +208,24 @@ void Client::stringParser(QString str)
             comst.append(commSyn.at(2));
 
             sendBlock(sClient::c_mute, comst);
+        }else if(endStr.startsWith("/kick",Qt::CaseInsensitive)){
+            commSyn = endStr.split(" ");
+            QString comst;
+            comst.append(commSyn.at(1));
+
+            sendBlock(sClient::c_kick, comst);
+        }else if(endStr.startsWith("/unban",Qt::CaseInsensitive)){
+            commSyn = endStr.split(" ");
+            QString comst;
+            comst.append(commSyn.at(1));
+
+            sendBlock(sClient::c_unban, comst);
+        }else if(endStr.startsWith("/unmute",Qt::CaseInsensitive)){
+            commSyn = endStr.split(" ");
+            QString comst;
+            comst.append(commSyn.at(1));
+
+            sendBlock(sClient::c_unmute, comst);
         }
     }else{
         endStr.replace("<sm=cat>","<img src=qrc:/smiles/cat_head.png>",Qt::CaseInsensitive);
