@@ -12,9 +12,7 @@ sClient::sClient(qintptr descr, Server *serv, QObject *parent) : QObject(parent)
 
     isLoggedIn = false;
     isMuted = false;
-    userName = "NULL";
-
-
+    //userName = "NULL";
 
     qDebug() << "new client" << endl;
 
@@ -121,10 +119,10 @@ void sClient::onReadyRead()
     }
     case c_message:
         if(isLoggedIn){
-            if (!isMuted){
                 QString msg;
                 QString mss;
                 in >> msg;
+                if (!server->db->isMuted(this->userName)){
                 QByteArray data;
                 QDataStream out(&data, QIODevice::WriteOnly);
                 //mss.append(mssep);
@@ -136,8 +134,9 @@ void sClient::onReadyRead()
                 out << mss;
                 server->sendToAll(c_message,data,userName,false);
             }else{
-
+                qDebug() << "user" << userName << "is muted";
             }
+
         }
         break;
     case c_onList:
@@ -221,7 +220,7 @@ void sClient::kick()
 
 void sClient::onReadyVoice()
 {
-    if(!isMuted)
+    if(!server->db->isMuted(this->userName))
     {
         QByteArray vc;
         if(voiceSock->bytesAvailable()>0){

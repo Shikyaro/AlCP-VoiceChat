@@ -5,9 +5,6 @@ Client::Client(QString host, quint16 port, QObject *parent) : QObject(parent)
 
     socket = new QTcpSocket(this);
 
-
-
-
     voiceSock = new QTcpSocket(this);
 
     blockSize = 0;
@@ -136,6 +133,8 @@ void Client::sendBlock(quint8 command, dataBlock data)
 
 bool Client::connectToSrv(QString host, quint16 port)
 {
+    cHost = host;
+    cPort = port;
     socket->connectToHost(QHostAddress(host), port);
 }
 
@@ -202,12 +201,14 @@ void Client::stringParser(QString str)
             sendBlock(sClient::c_ban, comst);
         }else if(endStr.startsWith("/mute",Qt::CaseInsensitive)){
             commSyn = endStr.split(" ");
-            QString comst;
-            comst.append(commSyn.at(1));
-            comst.append(",");
-            comst.append(commSyn.at(2));
+            if (commSyn.length()==3){
+                QString comst;
+                comst.append(commSyn.at(1));
+                comst.append(",");
+                comst.append(commSyn.at(2));
 
-            sendBlock(sClient::c_mute, comst);
+                sendBlock(sClient::c_mute, comst);
+            }
         }else if(endStr.startsWith("/kick",Qt::CaseInsensitive)){
             commSyn = endStr.split(" ");
             QString comst;

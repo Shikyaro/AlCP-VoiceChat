@@ -6,7 +6,16 @@
 #include "audiooutput.h"
 #include "../Server/sclient.h"
 #include <QStringList>
+#include <QMap>
 
+
+class comm
+{
+public:
+    comm(quint8 c_id, uint arg_c){comm_id = c_id; arg_count = arg_c;}
+    quint8 comm_id;
+    uint arg_count;
+};
 
 class Client : public QObject
 {
@@ -56,6 +65,8 @@ private:
     quint16     cPort;
 
     QString     userName;
+
+    QMap<QString, comm> commandMap;
 };
 
 #endif // CLIENT_H
