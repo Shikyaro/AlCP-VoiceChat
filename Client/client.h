@@ -8,11 +8,13 @@
 #include <QStringList>
 #include <QMap>
 
-
 class comm
 {
 public:
     comm(quint8 c_id, uint arg_c){comm_id = c_id; arg_count = arg_c;}
+    quint8 getId(){return comm_id;}
+    uint getCount(){return arg_count;}
+private:
     quint8 comm_id;
     uint arg_count;
 };
@@ -21,9 +23,15 @@ class Client : public QObject
 {
     Q_OBJECT
 public:
-    explicit Client(QString host, quint16 port, QObject *parent = 0);
+    explicit Client(QObject *parent = 0);
 
     bool    connectToSrv(QString host, quint16 port);
+
+    static const int       voice_channelCount = 1;
+    static const int       voice_sampleRate = 48000;
+    static const int       voice_sampleSize = 8;
+    static const QAudioFormat::Endian      voice_byteOrder = QAudioFormat::LittleEndian;
+    static const QAudioFormat::SampleType  voice_sampleType = QAudioFormat::UnSignedInt;
 
 signals:
     void    succLogin();
@@ -53,6 +61,9 @@ private:
     template <class dataBlock>
     void    sendBlock(quint8 command, dataBlock data);
 
+    void    handleCommand(QString mess);
+    void    replaceSmiles(QString mess);
+
     void    addVoiceSock();
 
     QTcpSocket  *socket;
@@ -66,7 +77,8 @@ private:
 
     QString     userName;
 
-    QMap<QString, comm> commandMap;
+    QMap<QString, comm*> commandMap;
+    QMap<QString, QString> smilesMap;
 };
 
 #endif // CLIENT_H

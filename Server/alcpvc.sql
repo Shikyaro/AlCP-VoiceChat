@@ -10,10 +10,28 @@ Target Server Type    : MYSQL
 Target Server Version : 50709
 File Encoding         : 65001
 
-Date: 2015-11-25 06:09:19
+Date: 2015-12-11 00:49:50
 */
 
 SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for commands
+-- ----------------------------
+DROP TABLE IF EXISTS `commands`;
+CREATE TABLE `commands` (
+  `commandName` varchar(50) NOT NULL,
+  `commandPower` int(11) NOT NULL,
+  PRIMARY KEY (`commandName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of commands
+-- ----------------------------
+INSERT INTO `commands` VALUES ('ban', '49');
+INSERT INTO `commands` VALUES ('chperm', '99');
+INSERT INTO `commands` VALUES ('kick', '24');
+INSERT INTO `commands` VALUES ('mute', '24');
 
 -- ----------------------------
 -- Table structure for permissions
@@ -59,7 +77,7 @@ INSERT INTO `users` VALUES ('Alkor', 'admin', '1', '0', null, '0', null);
 INSERT INTO `users` VALUES ('mod', 'mod', '2', '0', null, '0', null);
 INSERT INTO `users` VALUES ('qwe', 'qwe', '1', '0', null, '0', null);
 INSERT INTO `users` VALUES ('Shikyaro', 'admin', '2', '0', null, '0', null);
-INSERT INTO `users` VALUES ('su', 'su', '3', '0', null, '0', null);
+INSERT INTO `users` VALUES ('su', 'su', '4', '0', null, '0', null);
 
 -- ----------------------------
 -- Procedure structure for getPower

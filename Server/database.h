@@ -17,8 +17,10 @@ public:
     explicit database(QObject *parent = 0);
     bool initialize(QString hostname, QString dbname, QString username, QString password);
     uint getPower(QString userName);
+    uint getComPower(QString comName);
     bool authorize(QString userName, QString password);
     bool newUser(QString userName, QString password);
+    bool setPerm(QString username, uint perms);
     bool ban(QString username, QDateTime bantime);
     bool mute(QString username, QDateTime mutetime);
     bool isBanned(QString username);

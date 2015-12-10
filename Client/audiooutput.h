@@ -4,6 +4,7 @@
 #include <QtCore>
 #include <QtMultimedia>
 
+
 class AudioOutput : public QObject
 {
     Q_OBJECT

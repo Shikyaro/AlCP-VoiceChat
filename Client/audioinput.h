@@ -15,6 +15,7 @@ signals:
     void dataReady(QByteArray data);
 
 public slots:
+    void setMicVol(int vol);
 
 private slots:
     void readyRead();

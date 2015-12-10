@@ -1,6 +1,6 @@
 #include "client.h"
 
-Client::Client(QString host, quint16 port, QObject *parent) : QObject(parent)
+Client::Client(QObject *parent) : QObject(parent)
 {
 
     socket = new QTcpSocket(this);
@@ -13,6 +13,15 @@ Client::Client(QString host, quint16 port, QObject *parent) : QObject(parent)
     connect(socket, SIGNAL(readyRead()),this, SLOT(readyRead()));
     connect(socket,SIGNAL(disconnected()),this,SLOT(onDisconnect()));
     connect(voiceSock, SIGNAL(readyRead()),this,SLOT(readVoice()));
+
+    commandMap["/ban"] = new comm(sClient::c_ban, 2);
+    commandMap["/unban"] = new comm(sClient::c_unban, 1);
+    commandMap["/mute"] = new comm(sClient::c_mute, 2);
+    commandMap["/unmute"] = new comm(sClient::c_unmute, 1);
+    commandMap["/kick"] = new comm(sClient::c_kick, 1);
+    commandMap["/chperm"] = new comm(sClient::c_chperm, 2);
+
+    smilesMap["cat"] = "<img src=qrc:/smiles/cat_head.png>";
 }
 
 void Client::readyRead()
@@ -180,58 +189,50 @@ void Client::readVoice()
 
     if(voiceSock->bytesAvailable() > 0)
     {
+        qDebug() << voiceSock->bytesAvailable();
         voice.append(voiceSock->readAll());
         output.writeData(voice);
     }
 }
 
+void Client::handleCommand(QString mess)
+{
+    QStringList commsyn;
+    commsyn = mess.split(" ");
+    if(commandMap.contains(commsyn.at(0))){
+    QMap<QString, comm*>::iterator i = commandMap.find(commsyn.at(0));
+        if(commsyn.length()==i.value()->getCount()+1){
+            QString comst;
+            for(uint j=1; j<=i.value()->getCount(); j++){
+                comst.append(commsyn.at(j));
+                comst.append(",");
+            }
+            comst.remove(comst.length()-1,1);
+            qDebug() << comst;
+            sendBlock(i.value()->getId(), comst);
+        }
+    }
+}
+
+void Client::replaceSmiles(QString mess)
+{
+    QString endStr = mess;
+
+    QMapIterator<QString, QString> i(smilesMap);
+    while (i.hasNext()){
+        i.next();
+        endStr.replace(tr("<sm=%1>").arg(i.key()),i.value());
+    }
+    sendBlock(sClient::c_message, endStr);
+}
+
 void Client::stringParser(QString str)
 {
     QString endStr = str;
-    QStringList commSyn;
     if(endStr[0]=='/')
     {
-        if (endStr.startsWith("/ban",Qt::CaseInsensitive)){
-            commSyn = endStr.split(" ");
-            QString comst;
-            comst.append(commSyn.at(1));
-            comst.append(",");
-            comst.append(commSyn.at(2));
-
-            sendBlock(sClient::c_ban, comst);
-        }else if(endStr.startsWith("/mute",Qt::CaseInsensitive)){
-            commSyn = endStr.split(" ");
-            if (commSyn.length()==3){
-                QString comst;
-                comst.append(commSyn.at(1));
-                comst.append(",");
-                comst.append(commSyn.at(2));
-
-                sendBlock(sClient::c_mute, comst);
-            }
-        }else if(endStr.startsWith("/kick",Qt::CaseInsensitive)){
-            commSyn = endStr.split(" ");
-            QString comst;
-            comst.append(commSyn.at(1));
-
-            sendBlock(sClient::c_kick, comst);
-        }else if(endStr.startsWith("/unban",Qt::CaseInsensitive)){
-            commSyn = endStr.split(" ");
-            QString comst;
-            comst.append(commSyn.at(1));
-
-            sendBlock(sClient::c_unban, comst);
-        }else if(endStr.startsWith("/unmute",Qt::CaseInsensitive)){
-            commSyn = endStr.split(" ");
-            QString comst;
-            comst.append(commSyn.at(1));
-
-            sendBlock(sClient::c_unmute, comst);
-        }
+        handleCommand(endStr);
     }else{
-        endStr.replace("<sm=cat>","<img src=qrc:/smiles/cat_head.png>",Qt::CaseInsensitive);
-
-
-        sendBlock(sClient::c_message, endStr);
+        replaceSmiles(str);
     }
 }

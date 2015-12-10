@@ -118,10 +118,13 @@ void sClient::onReadyRead()
         break;
     }
     case c_message:
+    {
+        QString msg;
+        in >> msg;
         if(isLoggedIn){
-                QString msg;
+
                 QString mss;
-                in >> msg;
+
                 if (!server->db->isMuted(this->userName)){
                 QByteArray data;
                 QDataStream out(&data, QIODevice::WriteOnly);
@@ -139,6 +142,7 @@ void sClient::onReadyRead()
 
         }
         break;
+    }
     case c_onList:
     {
         sendOnline();
@@ -146,10 +150,11 @@ void sClient::onReadyRead()
     }
     case c_ban:
     {
-        if (server->db->getPower(this->userName)>=banpower)
+        QString uname;
+        in >> uname;
+        if (server->db->getPower(this->userName)>server->db->getComPower("ban"))
         {
-            QString uname;
-            in >> uname;
+
 
             QStringList comList;
 
@@ -170,12 +175,14 @@ void sClient::onReadyRead()
     }
     case c_mute:
     {
-        if (server->db->getPower(this->userName)>=mutepower)
+        QString ucom;
+        in >> ucom;
+        if (server->db->getPower(this->userName)>server->db->getComPower("mute"))
         {
-            QString ucom;
+
             QStringList comlst;
 
-            in >> ucom;
+
             comlst = ucom.split(",");
 
             if (server->db->getPower(this->userName)>server->db->getPower(comlst.at(0)))
@@ -189,15 +196,59 @@ void sClient::onReadyRead()
     }
     case c_kick:
     {
-        if (server->db->getPower(this->userName)>=kickpower)
+        QString ucom;
+        in >> ucom;
+        if (server->db->getPower(this->userName)>=server->db->getComPower("kick"))
         {
-            QString ucom;
-
-            in >> ucom;
-            qDebug() << ucom;
-
             if (server->db->getPower(this->userName)>server->db->getPower(ucom))
                 server->kick(ucom);
+            else
+            {
+
+            }
+        }
+        break;
+    }
+    case c_unmute:
+    {
+        QString ucom;
+        in >> ucom;
+        if(server->db->getPower(this->userName)>=server->db->getComPower("mute"))
+        {
+            if (server->db->getPower(this->userName)>server->db->getPower(ucom))
+                server->unmute(ucom);
+            else
+            {
+
+            }
+        }
+        break;
+    }
+    case c_unban:
+    {
+        QString ucom;
+        in >> ucom;
+        if(server->db->getPower(this->userName)>=server->db->getComPower("ban"))
+        {
+            if (server->db->getPower(this->userName)>server->db->getPower(ucom))
+                server->unban(ucom);
+            else
+            {
+
+            }
+        }
+        break;
+    }
+    case c_chperm:
+    {
+        QString ucom;
+        in >> ucom;
+        if (server->db->getPower(this->userName)>server->db->getComPower("chperm"))
+        {
+            QStringList comlst;
+            comlst = ucom.split(",");
+            if ((server->db->getPower(this->userName)>server->db->getPower(comlst.at(0)))&&(QString(comlst.at(1)).toUInt()!=1))
+                server->db->setPerm(comlst.at(0),QString(comlst.at(1)).toUInt());
             else
             {
 
@@ -220,14 +271,12 @@ void sClient::kick()
 
 void sClient::onReadyVoice()
 {
-    if(!server->db->isMuted(this->userName))
-    {
-        QByteArray vc;
-        if(voiceSock->bytesAvailable()>0){
-            if (!isMuted){
-                vc.append(voiceSock->readAll());
-                server->sendVoiceToAll(vc, userName);
-            }
+    QByteArray vc;
+    if(voiceSock->bytesAvailable()>0){
+        if (!isMuted){
+            vc.append(voiceSock->readAll());
+                if(!server->db->isMuted(this->userName))
+                    server->sendVoiceToAll(vc, userName);
         }
     }
 }

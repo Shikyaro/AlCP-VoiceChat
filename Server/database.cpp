@@ -38,6 +38,22 @@ uint database::getPower(QString userName)
     }
 }
 
+uint database::getComPower(QString comName)
+{
+    QSqlQuery que;
+    que.prepare(QString("SELECT permissionpower "
+                "FROM permissions "
+                "INNER JOIN users ON permissions.permissionid = users.permissions "
+                "WHERE users.username = \"%1\"").arg(comName));
+    if(que.exec()){
+        que.last();
+        return que.value(0).toUInt();
+    }else{
+        qDebug() << "Exec failed on getPower";
+        return 101;
+    }
+}
+
 QString database::getColor(QString userName)
 {
     QSqlQuery que;
@@ -218,6 +234,20 @@ bool database::unBan(QString username)
         return true;
     }else{
         qDebug() << "Exec failed on unBan";
+        return false;
+    }
+}
+
+bool database::setPerm(QString username, uint perms)
+{
+    QSqlQuery que;
+    que.prepare(QString("UPDATE users "
+                        "SET permissions = %2 "
+                        "WHERE users.username = \"%1\"").arg(username, tr("%1").arg(perms)));
+    if(que.exec()){
+        return true;
+    }else{
+        qDebug() << "Exec failed on setPerm";
         return false;
     }
 }

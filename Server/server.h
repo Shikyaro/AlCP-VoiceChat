@@ -30,6 +30,8 @@ public:
     QString  sendOnline(sClient* cli);
     void     mute(QString username, uint secs);
     void     ban(QString username, uint secs);
+    void     unmute(QString username);
+    void     unban(QString username);
     void     kick(QString username);
 
 protected:

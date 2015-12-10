@@ -13,8 +13,9 @@
 #include "audiooutput.h"
 #include "logindialog.h"
 #include <QTextBrowser>
-#include <exception>
-#include <QException>
+#include <QGroupBox>
+#include <QSlider>
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -31,6 +32,11 @@ private:
 
     QLineEdit *chatLine;
     QPushButton *chatBut;
+
+    QGroupBox *audSets;
+    QGridLayout *auSetLay;
+    QSlider *speakVol;
+    QSlider *microVol;
 
 
 public:

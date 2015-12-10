@@ -32,8 +32,24 @@ MainWindow::MainWindow(QWidget *parent)
     this->setCentralWidget(cw);
     cw->show();
 
-    client = new Client("127.0.0.1",6969, this);
+    audSets = new QGroupBox("Настройки звука");
+    auSetLay = new QGridLayout();
+
+    audSets->setLayout(auSetLay);
+
+    speakVol = new QSlider(Qt::Vertical);
+    microVol = new QSlider(Qt::Vertical);
+
+    auSetLay->addWidget(speakVol,0,0);
+    auSetLay->addWidget(microVol,0,1);
+    microVol->setRange(0,100);
+    microVol->setSliderPosition(100);
+
+    mlay->addWidget(audSets,0,2);
+
+    client = new Client(this);
     connect(client,SIGNAL(succLogin()),this,SLOT(succLogin()));
+
 
     //this->setEnabled(false);
     ldialog = new LoginDialog(client,this);
@@ -55,11 +71,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(client,SIGNAL(disc()),this,SLOT(onDisc()));
 
     connect(chatBut,SIGNAL(clicked(bool)),this,SLOT(sendMessage()));
-
 }
-
-
-
 MainWindow::~MainWindow()
 {
 
@@ -79,6 +91,7 @@ void MainWindow::succLogin()
     QAudioDeviceInfo devinfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput).at(0);
     input = new AudioInput(devinfo, this);
     connect(input, SIGNAL(dataReady(QByteArray)), client, SLOT(voiceSay(QByteArray)));
+    connect(microVol,SIGNAL(valueChanged(int)),input,SLOT(setMicVol(int)));
 }
 
 void MainWindow::newMessage(QString username, QString message, QString col)

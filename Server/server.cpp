@@ -134,6 +134,21 @@ void Server::mute(QString username, uint secs)
     }
 }
 
+void Server::unban(QString username)
+{
+    db->unBan(username);
+}
+
+void Server::unmute(QString username)
+{
+    sClient *cli;
+    db->unMute(username);
+    foreach (cli, cliList) {
+        if(username == cli->getName())
+            cli->setMuted(false);
+    }
+}
+
 void Server::ban(QString username, uint secs)
 {
     db->ban(username,QDateTime::currentDateTime().addSecs(secs));
