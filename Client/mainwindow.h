@@ -15,6 +15,9 @@
 #include <QTextBrowser>
 #include <QGroupBox>
 #include <QSlider>
+#include <QComboBox>
+#include <smilebutton.h>
+#include <usercontroldialog.h>
 
 class MainWindow : public QMainWindow
 {
@@ -38,6 +41,8 @@ private:
     QSlider *speakVol;
     QSlider *microVol;
 
+    QGridLayout *smilesLay;
+
 
 public:
     MainWindow(QWidget *parent = 0);
@@ -50,8 +55,13 @@ public slots:
     void newUser(QString username);
     void userDisc(QString username);
     void drawUserList(QStringList ulist);
-    //void error(QString text);
     void onDisc();
+    void addSm(QString smt);
+
+    void ShowUserContMenu(const QPoint &cmenu);
+    void showError(QString err);
+
+    bool eventFilter(QObject *obj, QEvent *event);
 protected:
 };
 

@@ -28,8 +28,8 @@ public:
     void     sendToAll(quint8 command, QByteArray data, QString senderName, bool exceptSender);
     void     sendVoiceToAll(QByteArray voice, QString senderName);
     QString  sendOnline(sClient* cli);
-    void     mute(QString username, uint secs);
-    void     ban(QString username, uint secs);
+    void     mute(QString username, long long secs);
+    void     ban(QString username, long long secs);
     void     unmute(QString username);
     void     unban(QString username);
     void     kick(QString username);

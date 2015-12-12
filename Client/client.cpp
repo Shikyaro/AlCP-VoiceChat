@@ -113,6 +113,14 @@ void Client::readyRead()
         emit this->isBanned();
         break;
     }
+    case sClient::c_err_mess:
+    {
+        QString errm;
+        in >> errm;
+
+        emit this->errMess(errm);
+        break;
+    }
     default:
         break;
     }
@@ -189,10 +197,16 @@ void Client::readVoice()
 
     if(voiceSock->bytesAvailable() > 0)
     {
-        qDebug() << voiceSock->bytesAvailable();
         voice.append(voiceSock->readAll());
         output.writeData(voice);
     }
+}
+
+void Client::setOutVol(int vol)
+{
+    qreal vl = vol;
+    vl = vl/100;
+    output.setVol(vl);
 }
 
 void Client::handleCommand(QString mess)
@@ -201,16 +215,23 @@ void Client::handleCommand(QString mess)
     commsyn = mess.split(" ");
     if(commandMap.contains(commsyn.at(0))){
     QMap<QString, comm*>::iterator i = commandMap.find(commsyn.at(0));
-        if(commsyn.length()==i.value()->getCount()+1){
+        if(commsyn.length()>=i.value()->getCount()+1){
             QString comst;
             for(uint j=1; j<=i.value()->getCount(); j++){
-                comst.append(commsyn.at(j));
-                comst.append(",");
+                if(j==2 && commsyn.at(j)=="")
+                    comst.append("4");
+                else
+                    comst.append(commsyn.at(j));
+                    comst.append(",");
             }
             comst.remove(comst.length()-1,1);
             qDebug() << comst;
             sendBlock(i.value()->getId(), comst);
+        }else{
+            emit this->errMess("Недостаточно аргументов команды");
         }
+    }else{
+        emit this->errMess("Нет такой команды");
     }
 }
 

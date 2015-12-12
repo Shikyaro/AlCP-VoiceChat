@@ -74,6 +74,8 @@ public:
     void        setVoiceSocket(QTcpSocket* sock);
 
     void        kick();
+
+    void        createError(QString errT);
 signals:
     void        userDisconnected(sClient* client);
     void        addVoiceSocket(sClient* cliToDel, QString username, QTcpSocket* sck);

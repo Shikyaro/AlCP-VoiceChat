@@ -13,11 +13,10 @@ AudioOutput::AudioOutput(QObject *parent) : QObject(parent)
 
     audio = new QAudioOutput(format, this);
 
-    audio->setVolume(30);
-
     //audio->setBufferSize(8192);
 
     device = audio->start();
+    audio->setVolume(0.5);
 }
 
 void AudioOutput::writeData(QByteArray data)

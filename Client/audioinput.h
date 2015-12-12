@@ -10,6 +10,8 @@ class AudioInput : public QObject
     Q_OBJECT
 public:
     explicit AudioInput(QAudioDeviceInfo devinfo, QObject *parent = 0);
+    void start(){audio->start();}
+    void stop(){audio->stop();}
 
 signals:
     void dataReady(QByteArray data);

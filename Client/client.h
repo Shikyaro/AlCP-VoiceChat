@@ -14,6 +14,7 @@ public:
     comm(quint8 c_id, uint arg_c){comm_id = c_id; arg_count = arg_c;}
     quint8 getId(){return comm_id;}
     uint getCount(){return arg_count;}
+
 private:
     quint8 comm_id;
     uint arg_count;
@@ -26,12 +27,7 @@ public:
     explicit Client(QObject *parent = 0);
 
     bool    connectToSrv(QString host, quint16 port);
-
-    static const int       voice_channelCount = 1;
-    static const int       voice_sampleRate = 48000;
-    static const int       voice_sampleSize = 8;
-    static const QAudioFormat::Endian      voice_byteOrder = QAudioFormat::LittleEndian;
-    static const QAudioFormat::SampleType  voice_sampleType = QAudioFormat::UnSignedInt;
+    QMap<QString,comm*> getCommMap(){return commandMap;}
 
 signals:
     void    succLogin();
@@ -44,6 +40,7 @@ signals:
     void    dUser(QString uname);
     void    userList(QStringList usrs);
     void    disc();
+    void    errMess(QString err);
 
 public slots:
     void    login(QString login, QString password);
@@ -51,13 +48,13 @@ public slots:
     void    voiceSay(QByteArray data);
     void    readVoice();
     void    stringParser(QString str);
+    void    setOutVol(int vol);
 
 private slots:
     void    readyRead();
     void    onDisconnect();
 
 private:
-
     template <class dataBlock>
     void    sendBlock(quint8 command, dataBlock data);
 
@@ -65,6 +62,8 @@ private:
     void    replaceSmiles(QString mess);
 
     void    addVoiceSock();
+
+
 
     QTcpSocket  *socket;
     QTcpSocket  *voiceSock;

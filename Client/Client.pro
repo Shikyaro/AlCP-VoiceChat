@@ -18,13 +18,17 @@ SOURCES += main.cpp\
     audiooutput.cpp \
     client.cpp \
     audioinput.cpp \
-    logindialog.cpp
+    logindialog.cpp \
+    smilebutton.cpp \
+    usercontroldialog.cpp
 
 HEADERS  += mainwindow.h \
     audiooutput.h \
     client.h \
     audioinput.h \
-    logindialog.h
+    logindialog.h \
+    smilebutton.h \
+    usercontroldialog.h
 
 RESOURCES += \
     smiles.qrc

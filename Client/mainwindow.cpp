@@ -50,8 +50,19 @@ MainWindow::MainWindow(QWidget *parent)
     client = new Client(this);
     connect(client,SIGNAL(succLogin()),this,SLOT(succLogin()));
 
+    smilesLay = new QGridLayout();
+
+    smileButton *c_sm = new smileButton("cat_head.png","<sm=cat>");
+    connect(c_sm,SIGNAL(smButClicked(QString)),this,SLOT(addSm(QString)));
+
+    smilesLay->addWidget(c_sm,0,0);
+    mlay->addLayout(smilesLay,2,0);
+
+
 
     //this->setEnabled(false);
+
+
     ldialog = new LoginDialog(client,this);
     ldialog->show();
 
@@ -67,6 +78,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(client,SIGNAL(dUser(QString)),this,SLOT(userDisc(QString)));
     connect(client,SIGNAL(userList(QStringList)),this,SLOT(drawUserList(QStringList)));
     connect(client,SIGNAL(isBanned()),ldialog,SLOT(onBan()));
+    connect(client,SIGNAL(errMess(QString)),this,SLOT(showError(QString)));
 
     connect(client,SIGNAL(disc()),this,SLOT(onDisc()));
 
@@ -75,6 +87,11 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
 
+}
+
+void MainWindow::addSm(QString smt)
+{
+    chatLine->setText(chatLine->text()+= tr(" %1 ").arg(smt));
 }
 
 void MainWindow::onDisc()
@@ -92,6 +109,7 @@ void MainWindow::succLogin()
     input = new AudioInput(devinfo, this);
     connect(input, SIGNAL(dataReady(QByteArray)), client, SLOT(voiceSay(QByteArray)));
     connect(microVol,SIGNAL(valueChanged(int)),input,SLOT(setMicVol(int)));
+    connect(speakVol,SIGNAL(valueChanged(int)),client,SLOT(setOutVol(int)));
 }
 
 void MainWindow::newMessage(QString username, QString message, QString col)
@@ -108,6 +126,22 @@ void MainWindow::sendMessage()
 void MainWindow::newUser(QString username)
 {
     userWidget->addItem(username);
+    userWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(userWidget,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(ShowUserContMenu(QPoint)));
+}
+
+void MainWindow::showError(QString err)
+{
+    QMessageBox::warning(this,"Ошибка",err);
+}
+
+void MainWindow::ShowUserContMenu(const QPoint &cmenu)
+{
+    userControlDialog *contr = new userControlDialog(userWidget->itemAt(cmenu)->text(),client->getCommMap());
+    qDebug() << "contr";
+    connect(contr, SIGNAL(sendComm(QString)), client, SLOT(stringParser(QString)));
+    contr->show();
 }
 
 void MainWindow::userDisc(QString username)
@@ -124,4 +158,22 @@ void MainWindow::drawUserList(QStringList ulist)
             newUser(str);
         }
     }
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if(event->type()==QEvent::KeyPress){
+        QKeyEvent *qke = static_cast<QKeyEvent *>(event);
+        if(qke->key()==Qt::Key_F1){
+            input->start();
+            return true;
+        }
+    }else if (event->type()==QEvent::KeyRelease){
+        QKeyEvent *qke = static_cast<QKeyEvent *>(event);
+        if(qke->key()==Qt::Key_F1){
+            input->stop();
+            return true;
+        }
+    }
+    return false;
 }

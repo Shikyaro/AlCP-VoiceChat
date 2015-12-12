@@ -18,7 +18,6 @@ sClient::sClient(qintptr descr, Server *serv, QObject *parent) : QObject(parent)
 
     connect(socket, SIGNAL(disconnected()),  this,   SLOT(onDisconnect()));
     connect(socket, SIGNAL(readyRead()),     this,   SLOT(onReadyRead()));
-
     connect(voiceSock, SIGNAL(readyRead()),  this,   SLOT(onReadyVoice()));
 }
 
@@ -122,9 +121,7 @@ void sClient::onReadyRead()
         QString msg;
         in >> msg;
         if(isLoggedIn){
-
                 QString mss;
-
                 if (!server->db->isMuted(this->userName)){
                 QByteArray data;
                 QDataStream out(&data, QIODevice::WriteOnly);
@@ -137,7 +134,7 @@ void sClient::onReadyRead()
                 out << mss;
                 server->sendToAll(c_message,data,userName,false);
             }else{
-                qDebug() << "user" << userName << "is muted";
+                 createError("Вы не можте писать сообщения в чат");
             }
 
         }
@@ -154,23 +151,18 @@ void sClient::onReadyRead()
         in >> uname;
         if (server->db->getPower(this->userName)>server->db->getComPower("ban"))
         {
-
-
             QStringList comList;
 
             comList = uname.split(",");
 
             if (server->db->getPower(this->userName)>server->db->getPower(comList.at(0)))
-                server->ban(comList.at(0),QString(comList.at(1)).toUInt());
+                server->ban(comList.at(0),QString(comList.at(1)).toLongLong());
             else
             {
-
+                createError("У вас нет прав на применение этой команды к этому пользователю");
             }
-        }
-        else
-        {
-            //sendBlock(c_err_mess,);
-        }
+        }else
+             createError("У вас нет прав на использование этой команды");
         break;
     }
     case c_mute:
@@ -186,12 +178,13 @@ void sClient::onReadyRead()
             comlst = ucom.split(",");
 
             if (server->db->getPower(this->userName)>server->db->getPower(comlst.at(0)))
-                server->mute(comlst.at(0),QString(comlst.at(1)).toUInt());
+                server->mute(comlst.at(0),QString(comlst.at(1)).toLongLong());
             else
             {
-
+                createError("У вас нет прав на применение этой команды к этому пользователю");
             }
-        }
+        }else
+            createError("У вас нет прав на использование этой команды");
         break;
     }
     case c_kick:
@@ -219,9 +212,10 @@ void sClient::onReadyRead()
                 server->unmute(ucom);
             else
             {
-
+                createError("У вас нет прав на применение этой команды к этому пользователю");
             }
-        }
+        }else
+            createError("У вас нет прав на использование этой команды");
         break;
     }
     case c_unban:
@@ -234,9 +228,10 @@ void sClient::onReadyRead()
                 server->unban(ucom);
             else
             {
-
+                createError("У вас нет прав на применение этой команды к этому пользователю");
             }
-        }
+        } else
+            createError("У вас нет прав на использование этой команды");
         break;
     }
     case c_chperm:
@@ -251,9 +246,10 @@ void sClient::onReadyRead()
                 server->db->setPerm(comlst.at(0),QString(comlst.at(1)).toUInt());
             else
             {
-
+                createError("У вас нет прав на применение этой команды к этому пользователю");
             }
-        }
+        } else
+            createError("У вас нет прав на использование этой команды");
         break;
     }
     default:
@@ -267,6 +263,15 @@ void sClient::kick()
     voiceSock->disconnectFromHost();
     socket->disconnectFromHost();
 
+}
+
+void sClient::createError(QString errT)
+{
+    QByteArray data;
+    QDataStream out(&data, QIODevice::WriteOnly);
+    out << errT;
+
+    this->sendBlock(c_err_mess, data);
 }
 
 void sClient::onReadyVoice()

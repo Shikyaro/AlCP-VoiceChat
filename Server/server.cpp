@@ -122,7 +122,7 @@ void Server::checkMute()
     }
 }
 
-void Server::mute(QString username, uint secs)
+void Server::mute(QString username, long long secs)
 {
     db->mute(username,QDateTime::currentDateTime().addSecs(secs));
 
@@ -149,7 +149,7 @@ void Server::unmute(QString username)
     }
 }
 
-void Server::ban(QString username, uint secs)
+void Server::ban(QString username, long long secs)
 {
     db->ban(username,QDateTime::currentDateTime().addSecs(secs));
 
