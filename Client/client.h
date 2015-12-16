@@ -29,6 +29,8 @@ public:
     bool    connectToSrv(QString host, quint16 port);
     QMap<QString,comm*> getCommMap(){return commandMap;}
 
+    static QMap<QString, comm*> commandMap;
+
 signals:
     void    succLogin();
     void    unSuccLogin();
@@ -76,7 +78,7 @@ private:
 
     QString     userName;
 
-    QMap<QString, comm*> commandMap;
+
     QMap<QString, QString> smilesMap;
 };
 

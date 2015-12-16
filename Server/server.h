@@ -33,6 +33,7 @@ public:
     void     unmute(QString username);
     void     unban(QString username);
     void     kick(QString username);
+    void     serverMessage(QString msg);
 
 protected:
     void    incomingConnection(qintptr handle);

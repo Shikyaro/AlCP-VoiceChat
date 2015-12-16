@@ -155,8 +155,11 @@ void sClient::onReadyRead()
 
             comList = uname.split(",");
 
-            if (server->db->getPower(this->userName)>server->db->getPower(comList.at(0)))
+            if (server->db->getPower(this->userName)>server->db->getPower(comList.at(0))){
+
                 server->ban(comList.at(0),QString(comList.at(1)).toLongLong());
+                server->serverMessage(tr("Пользователь \"%1\" получил бан на %2 секунд").arg(comList.at(0),comList.at(1)));
+            }
             else
             {
                 createError("У вас нет прав на применение этой команды к этому пользователю");
@@ -174,11 +177,12 @@ void sClient::onReadyRead()
 
             QStringList comlst;
 
-
             comlst = ucom.split(",");
 
-            if (server->db->getPower(this->userName)>server->db->getPower(comlst.at(0)))
+            if (server->db->getPower(this->userName)>server->db->getPower(comlst.at(0))){
                 server->mute(comlst.at(0),QString(comlst.at(1)).toLongLong());
+                server->serverMessage(tr("Пользователь '%1' получил мут на %2 секунд").arg(comlst.at(0),comlst.at(1)));
+            }
             else
             {
                 createError("У вас нет прав на применение этой команды к этому пользователю");
@@ -193,12 +197,16 @@ void sClient::onReadyRead()
         in >> ucom;
         if (server->db->getPower(this->userName)>=server->db->getComPower("kick"))
         {
-            if (server->db->getPower(this->userName)>server->db->getPower(ucom))
+            if (server->db->getPower(this->userName)>server->db->getPower(ucom)){
                 server->kick(ucom);
+                server->serverMessage(tr("Пользователь \"%1\" был выкинут из чата"));
+            }
             else
             {
-
+                createError("У вас нет прав на применение этой команды к этому пользователю");
             }
+        }else{
+            createError("У вас нет прав на использование этой команды");
         }
         break;
     }

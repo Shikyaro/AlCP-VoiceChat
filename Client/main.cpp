@@ -1,4 +1,7 @@
 #include "mainwindow.h"
+#include "client.h"
+#include "audioinput.h"
+#include "audiooutput.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
@@ -10,6 +13,17 @@ int main(int argc, char *argv[])
         QCoreApplication::setLibraryPaths(paths);
 
     QApplication a(argc, argv);
+
+    QAudioDeviceInfo devinfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput).at(0);
+
+    Client *client = new Client(this);
+    AudioInput *input = new AudioInput(devinfo,this);
+    AudioOutput *output = new AudioOutput(this);
+
+
+
+
+
     MainWindow w;
     w.show();
 

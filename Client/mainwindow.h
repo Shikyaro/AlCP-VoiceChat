@@ -61,7 +61,7 @@ public slots:
     void ShowUserContMenu(const QPoint &cmenu);
     void showError(QString err);
 
-    bool eventFilter(QObject *obj, QEvent *event);
+    //bool eventFilter(QObject *obj, QEvent *event);
 protected:
 };
 

@@ -139,7 +139,6 @@ void MainWindow::showError(QString err)
 void MainWindow::ShowUserContMenu(const QPoint &cmenu)
 {
     userControlDialog *contr = new userControlDialog(userWidget->itemAt(cmenu)->text(),client->getCommMap());
-    qDebug() << "contr";
     connect(contr, SIGNAL(sendComm(QString)), client, SLOT(stringParser(QString)));
     contr->show();
 }
@@ -160,7 +159,7 @@ void MainWindow::drawUserList(QStringList ulist)
     }
 }
 
-bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+/*bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
     if(event->type()==QEvent::KeyPress){
         QKeyEvent *qke = static_cast<QKeyEvent *>(event);
@@ -176,4 +175,4 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         }
     }
     return false;
-}
+}*/

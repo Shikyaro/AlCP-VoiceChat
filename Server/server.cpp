@@ -45,6 +45,24 @@ void Server::incomingConnection(qintptr handle)
      cliList.append(client);
 
 }
+
+void Server::serverMessage(QString msg)
+{
+    QByteArray data;
+    QString strr;
+    QDataStream out(&data,QIODevice::WriteOnly);
+
+    strr.append("SERVER");
+    strr.append(mssep);
+    strr.append(msg);
+    strr.append(mssep);
+    strr.append("red");
+
+    out << strr;
+
+    this->sendToAll(sClient::c_message,data,"SERVER",false);
+}
+
 void Server::onUserDisconnected(sClient *client)
 {
     cliList.removeAt(cliList.indexOf(client));
