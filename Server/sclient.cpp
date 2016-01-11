@@ -202,7 +202,7 @@ void sClient::onReadyRead()
         {
             if (server->db->getPower(this->userName)>server->db->getPower(ucom)){
                 server->kick(ucom);
-                server->serverMessage(tr("Пользователь \"%1\" был выкинут из чата"));
+                server->serverMessage(tr("Пользователь %1 был выкинут из чата").arg(ucom));
             }
             else
             {

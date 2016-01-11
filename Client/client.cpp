@@ -29,6 +29,7 @@ Client::Client(QObject *parent) : QObject(parent)
 
 void Client::readyRead()
 {
+    while (socket->bytesAvailable()>0){
     QDataStream in(socket);  //поток ввода с сокета
     if (blockSize == 0) {
         if (socket->bytesAvailable() < (int)sizeof(quint16)) //если байтов меньше 2
@@ -126,6 +127,7 @@ void Client::readyRead()
     }
     default:
         break;
+    }
     }
 }
 

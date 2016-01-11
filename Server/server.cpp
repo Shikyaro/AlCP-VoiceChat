@@ -70,7 +70,7 @@ void Server::serverMessage(QString msg)
 void Server::onUserDisconnected(sClient *client)
 {
     cliList.removeAt(cliList.indexOf(client));
-    delete client;
+    //delete client;
 
     qDebug() << "User " << client->getName() << " disconnected";
 }
