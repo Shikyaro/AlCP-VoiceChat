@@ -1,3 +1,7 @@
+/*************************/
+/*  Автор: Романов Павел */
+/*     Группа: П-304     */
+/*************************/
 #include "sclient.h"
 
 sClient::sClient(qintptr descr, Server *serv, QObject *parent) : QObject(parent)
@@ -12,7 +16,6 @@ sClient::sClient(qintptr descr, Server *serv, QObject *parent) : QObject(parent)
 
     isLoggedIn = false;
     isMuted = false;
-    //userName = "NULL";
 
     qDebug() << "new client" << endl;
 
@@ -23,7 +26,6 @@ sClient::sClient(qintptr descr, Server *serv, QObject *parent) : QObject(parent)
 
 sClient::~sClient()
 {
-
 }
 
 void sClient::onDisconnect()
@@ -35,11 +37,12 @@ void sClient::onDisconnect()
         out << this->userName;
 
         server->sendToAll(sClient::c_userDisc,data,this->userName,true);
-        emit userDisconnected(this);
+        //emit userDisconnected(this);
     }else{
-        deleteLater();
+        //deleteLater();
         qDebug() << "User disc";
     }
+    emit userDisconnected(this);
 }
 
 void sClient::onReadyRead()
@@ -67,7 +70,7 @@ void sClient::onReadyRead()
         QStringList lp;
         QString logp;
         in >> logp;
-        lp = logp.split(lpsep);
+        lp = logp.split(" ");
 
         if (server->db->authorize(lp.at(0),lp.at(1))){
             if(!server->db->isBanned(lp.at(0))){
@@ -104,7 +107,7 @@ void sClient::onReadyRead()
         QString logp;
         in >> logp;
 
-        lp = logp.split(lpsep);
+        lp = logp.split(" ");
 
         if ((isValid(lp.at(0)))){ 
             if((server->db->newUser(lp.at(0),lp.at(1))))
@@ -268,8 +271,10 @@ void sClient::onReadyRead()
 
 void sClient::kick()
 {
-    voiceSock->disconnectFromHost();
-    socket->disconnectFromHost();
+    if (voiceSock)
+        voiceSock->disconnectFromHost();
+    if (socket)
+        socket->disconnectFromHost();
 
 }
 
@@ -315,8 +320,9 @@ void sClient::sendVoice(QByteArray data)
 
 bool sClient::isValid(QString userName)
 {
-    QRegExp reg("[A-z_]+");
-    return (reg.exactMatch(userName));
+    QRegularExpression reg("[A-Za-z0-9_]+$");
+    QRegularExpressionMatch rmat = (reg.match(userName));
+    return rmat.isValid();
 }
 
 void sClient::setVoiceSocket(QTcpSocket* sock)

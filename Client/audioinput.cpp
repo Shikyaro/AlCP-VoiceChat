@@ -1,3 +1,7 @@
+/*************************/
+/*  Автор: Романов Павел */
+/*     Группа: П-304     */
+/*************************/
 #include "audioinput.h"
 
 AudioInput::AudioInput(QAudioDeviceInfo devinfo, QObject *parent) : QObject(parent)
@@ -40,5 +44,17 @@ void AudioInput::setMicVol(int vol)
     retv=retv/100;
 
     audio->setVolume(retv);
+
+}
+
+void AudioInput::setAudio(bool st)
+{
+    if(st)
+        audio->setVolume(svol);
+    else
+    {
+        svol=audio->volume();
+        audio->setVolume(0);
+    }
 
 }

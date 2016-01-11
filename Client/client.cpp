@@ -1,5 +1,8 @@
+/*************************/
+/*  Автор: Романов Павел */
+/*     Группа: П-304     */
+/*************************/
 #include "client.h"
-
 Client::Client(QObject *parent) : QObject(parent)
 {
 
@@ -26,27 +29,27 @@ Client::Client(QObject *parent) : QObject(parent)
 
 void Client::readyRead()
 {
-    QDataStream in(socket);
+    QDataStream in(socket);  //поток ввода с сокета
     if (blockSize == 0) {
-        if (socket->bytesAvailable() < (int)sizeof(quint16))
+        if (socket->bytesAvailable() < (int)sizeof(quint16)) //если байтов меньше 2
         {
-            return;
+            return; //выпадаем из функции
         }
-        in >> blockSize;
+        in >> blockSize; //если нет, то считываем размер блока
         qDebug() << "block " << blockSize;
         qDebug() << socket->bytesAvailable();
     }
-    if (socket->bytesAvailable() < blockSize)
-        return;
+    if (socket->bytesAvailable() < blockSize) //если размер блока меньше, чем пришло байт
+        return; //выпадаем
     else
 
-        blockSize = 0;
+        blockSize = 0; //обнуляем размер блока, если пришли все данные блока
 
     quint8 command;
     command = 0;
-    in >> command;
+    in >> command; //считываем команду
     qDebug() << command;
-    switch (command) {
+    switch (command) { //обрабатываем команду
     case sClient::c_SuccLogin:
     {
         emit this->succLogin();
@@ -136,16 +139,16 @@ void Client::onDisconnect()
 template <class dataBlock>
 void Client::sendBlock(quint8 command, dataBlock data)
 {
-    QByteArray block;
+    QByteArray block; //создаем блок для записи
     QDataStream out(&block, QIODevice::WriteOnly);
-    out << (quint16)0;
-    out << command;
-    if (data!=NULL){
-        out << data;
+    out << (quint16)0; //резервируем первые 2 байта под размер
+    out << command; //записываем команду
+    if (data!=NULL){ //если у команды есть данные
+        out << data; //пишем их
     }
-    out.device()->seek(0);
-    out << (quint16)(block.size() - sizeof(quint16));
-    socket->write(block);
+    out.device()->seek(0); //перемещаемся в начало блока
+    out << (quint16)(block.size() - sizeof(quint16)); //записываем в 2 зарезервированных байта размер блока
+    socket->write(block); //пишем блок в сокет
 }
 
 bool Client::connectToSrv(QString host, quint16 port)
@@ -167,22 +170,47 @@ void Client::addVoiceSock()
     voiceSock->write(block);
 }
 
+QString Client::hashPW(QString msg)
+{
+    QByteArray *spw = new QByteArray();
+    QString ret;
+    QDataStream out(spw,QIODevice::WriteOnly);
+    out << msg;
+    ret = QCryptographicHash::hash(*spw,QCryptographicHash::Sha3_256).toHex();
+
+    return ret;
+}
+
+void Client::setAudio(bool st)
+{
+    output.setAudio(st);
+}
+
 void Client::login(QString login, QString password)
 {
+    QString pw;
+    pw=hashPW(password);
     userName = login;
     QString lp(login);
-    lp.append(lpsep);
-    lp.append(password);
-
+    lp.append(" ");
+    lp.append(pw);
     sendBlock(sClient::c_login, lp);
 }
+
 void Client::reg(QString login, QString password)
 {
-    QString lp(login);
-    lp.append(lpsep);
-    lp.append(password);
-
-    sendBlock(sClient::c_reg, lp);
+    QStringList spacesList = login.split(" ");
+    if(spacesList.length()==1)
+    {
+        QString pw;
+        pw=hashPW(password);
+        QString lp(login);
+        lp.append(" ");
+        lp.append(pw);
+        sendBlock(sClient::c_reg, lp);
+    }
+    else
+        emit this->unSuccReg();
 }
 
 void Client::voiceSay(QByteArray data)
@@ -206,7 +234,8 @@ void Client::setOutVol(int vol)
 {
     qreal vl = vol;
     vl = vl/100;
-    output.setVol(vl);
+    if(output.getenb())
+        output.setVol(vl);
 }
 
 void Client::handleCommand(QString mess)

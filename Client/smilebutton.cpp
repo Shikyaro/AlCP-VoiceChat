@@ -1,3 +1,7 @@
+/*************************/
+/*  Автор: Романов Павел */
+/*     Группа: П-304     */
+/*************************/
 #include "smilebutton.h"
 
 smileButton::smileButton(QString smI, QString smT, QWidget *parent) : QPushButton(parent)

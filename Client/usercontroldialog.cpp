@@ -1,3 +1,7 @@
+/*************************/
+/*  Автор: Романов Павел */
+/*     Группа: П-304     */
+/*************************/
 #include "usercontroldialog.h"
 
 userControlDialog::userControlDialog(QString username, QMap<QString, comm *> cMap, QWidget *parent) : QWidget(parent)

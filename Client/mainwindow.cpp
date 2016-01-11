@@ -1,3 +1,7 @@
+/*************************/
+/*  Автор: Романов Павел */
+/*     Группа: П-304     */
+/*************************/
 #include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -16,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     chatLine = new QLineEdit();
     chatBut = new QPushButton("->");
+    chatBut->setShortcut(Qt::Key_Return);
 
     ml->addWidget(chatLine);
     ml->addWidget(chatBut);
@@ -40,10 +45,26 @@ MainWindow::MainWindow(QWidget *parent)
     speakVol = new QSlider(Qt::Vertical);
     microVol = new QSlider(Qt::Vertical);
 
+    micOn = new QCheckBox();
+    micOn->setShortcut(Qt::ALT + Qt::Key_M);
+    micOn->setChecked(true);
+
+    speakOn = new QCheckBox();
+    speakOn->setShortcut(Qt::ALT + Qt::Key_S);
+    speakOn->setChecked(true);
+
     auSetLay->addWidget(speakVol,0,0);
     auSetLay->addWidget(microVol,0,1);
+    auSetLay->addWidget(new QLabel("Speak"),1,0,Qt::AlignCenter);
+    auSetLay->addWidget(new QLabel("Micro"),1,1,Qt::AlignCenter);
+    auSetLay->addWidget(micOn,2,1,Qt::AlignCenter);
+    auSetLay->addWidget(speakOn,2,0,Qt::AlignCenter);
+
     microVol->setRange(0,100);
     microVol->setSliderPosition(100);
+
+    speakVol->setRange(0,100);
+    speakVol->setSliderPosition(100);
 
     mlay->addWidget(audSets,0,2);
 
@@ -58,13 +79,10 @@ MainWindow::MainWindow(QWidget *parent)
     smilesLay->addWidget(c_sm,0,0);
     mlay->addLayout(smilesLay,2,0);
 
-
-
-    //this->setEnabled(false);
-
-
     ldialog = new LoginDialog(client,this);
     ldialog->show();
+
+
 
     connect(ldialog,SIGNAL(s_log(QString,QString)),client,SLOT(login(QString,QString)));
     connect(ldialog,SIGNAL(s_reg(QString,QString)),client,SLOT(reg(QString,QString)));
@@ -72,6 +90,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(client,SIGNAL(unSuccReg()),ldialog,SLOT(onUnSuccReg()));
     connect(client,SIGNAL(unSuccLogin()),ldialog,SLOT(onUnSuccLogin()));
+    connect(client,SIGNAL(succReg()),ldialog,SLOT(onSuccReg()));
     connect(client,SIGNAL(succLogin()),this,SLOT(succLogin()));
     connect(client,SIGNAL(newMessage(QString,QString,QString)),this,SLOT(newMessage(QString,QString,QString)));
     connect(client,SIGNAL(nUser(QString)),this,SLOT(newUser(QString)));
@@ -108,8 +127,12 @@ void MainWindow::succLogin()
     QAudioDeviceInfo devinfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput).at(0);
     input = new AudioInput(devinfo, this);
     connect(input, SIGNAL(dataReady(QByteArray)), client, SLOT(voiceSay(QByteArray)));
+
     connect(microVol,SIGNAL(valueChanged(int)),input,SLOT(setMicVol(int)));
     connect(speakVol,SIGNAL(valueChanged(int)),client,SLOT(setOutVol(int)));
+
+    connect(micOn,SIGNAL(toggled(bool)),input,SLOT(setAudio(bool)));
+    connect(speakOn,SIGNAL(toggled(bool)),client,SLOT(setAudio(bool)));
 }
 
 void MainWindow::newMessage(QString username, QString message, QString col)
@@ -133,7 +156,7 @@ void MainWindow::newUser(QString username)
 
 void MainWindow::showError(QString err)
 {
-    QMessageBox::warning(this,"Ошибка",err);
+    this->newMessage("Error", err, "red");
 }
 
 void MainWindow::ShowUserContMenu(const QPoint &cmenu)

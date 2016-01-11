@@ -1,3 +1,7 @@
+/*************************/
+/*  Автор: Романов Павел */
+/*     Группа: П-304     */
+/*************************/
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -18,6 +22,7 @@
 #include <QComboBox>
 #include <smilebutton.h>
 #include <usercontroldialog.h>
+#include <QCheckBox>
 
 class MainWindow : public QMainWindow
 {
@@ -42,6 +47,9 @@ private:
     QSlider *microVol;
 
     QGridLayout *smilesLay;
+
+    QCheckBox *micOn;
+    QCheckBox *speakOn;
 
 
 public:

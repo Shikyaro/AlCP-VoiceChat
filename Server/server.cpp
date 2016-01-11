@@ -1,3 +1,7 @@
+/*************************/
+/*  Автор: Романов Павел */
+/*     Группа: П-304     */
+/*************************/
 #include "server.h"
 
 Server::Server(quint16 port, QObject *parent) : QTcpServer(parent)
@@ -66,6 +70,7 @@ void Server::serverMessage(QString msg)
 void Server::onUserDisconnected(sClient *client)
 {
     cliList.removeAt(cliList.indexOf(client));
+    delete client;
 
     qDebug() << "User " << client->getName() << " disconnected";
 }

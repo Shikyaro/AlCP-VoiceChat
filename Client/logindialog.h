@@ -1,3 +1,7 @@
+/*************************/
+/*  Автор: Романов Павел */
+/*     Группа: П-304     */
+/*************************/
 #ifndef LOGINDIALOG_H
 #define LOGINDIALOG_H
 
@@ -27,6 +31,7 @@ signals:
 public slots:
     void onUnSuccLogin();
     void onUnSuccReg();
+    void onSuccReg();
     void onBan();
 
 private:

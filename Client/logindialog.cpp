@@ -1,3 +1,7 @@
+/*************************/
+/*  Автор: Романов Павел */
+/*     Группа: П-304     */
+/*************************/
 #include "logindialog.h"
 
 LoginDialog::LoginDialog(Client *cli, QWidget *parent) : QDialog(parent)
@@ -46,20 +50,20 @@ LoginDialog::LoginDialog(Client *cli, QWidget *parent) : QDialog(parent)
 }
 void LoginDialog::onReg()
 {
-    //if(client->connectToSrv(ip->text(),port->text().toUInt()))
+    if(pass->text().length()>4){
     client->connectToSrv(ip->text(),port->text().toUInt());
         emit this->s_reg(login->text(), pass->text());
-    //else
-       // QMessageBox::warning(this, "Ошибка", "Невозможно подключиться к серверу");
+    }
+    else
+    {
+        QMessageBox::warning(this,"Ошибка","Пароль должен быть длиннее 5 символов");
+    }
 }
 
 void LoginDialog::onLog()
 {
-    //if(client->connectToSrv(ip->text(),port->text().toUInt()))
     client->connectToSrv(ip->text(),port->text().toUInt());
         emit this->s_log(login->text(), pass->text());
-    //else
-       // QMessageBox::warning(this, "Ошибка", "Невозможно подключиться к серверу");
 }
 
 void LoginDialog::_onExit()
@@ -77,6 +81,10 @@ void LoginDialog::onUnSuccReg()
 void LoginDialog::onBan()
 {
     QMessageBox::warning(this,"Ошибка","Извините, но вы забанены на этом сервере");
+}
+void LoginDialog::onSuccReg()
+{
+    QMessageBox::information(this,"Успех","Регистрация выполнена успешно");
 }
 
 
